@@ -1,65 +1,167 @@
-import Image from "next/image";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { ScanForm } from "@/components/ScanForm";
+
+const CHECKS = [
+  { label: "Dangerous commands", desc: "rm -rf, curl|bash, eval(), sudo", icon: ">" },
+  { label: "Data exfiltration", desc: "Outbound HTTP, webhooks, tunnels", icon: "^" },
+  { label: "Prompt injection", desc: "Override instructions, identity hijack", icon: "!" },
+  { label: "Permission overreach", desc: "Excessive tool access (Bash, Write)", icon: "#" },
+  { label: "Dependency risk", desc: "npm install, piped downloads, git clone", icon: "@" },
+  { label: "Code obfuscation", desc: "Base64, hex encoding, fromCharCode", icon: "~" },
+  { label: "Sensitive file access", desc: ".env, credentials, private keys", icon: "*" },
+  { label: "AI deep review", desc: "Hidden logic, social engineering, backdoors", icon: "?" },
+];
+
+const STATS = [
+  { value: "12", label: "Static checks" },
+  { value: "8", label: "LLM audit categories" },
+  { value: "$0.02", label: "Per scan (x402)" },
+  { value: "Base", label: "Network" },
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="relative grid-bg overflow-hidden">
+          {/* Gradient orbs */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-3xl" />
+            <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-3xl" />
+          </div>
+
+          <div className="relative max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs text-zinc-500 mb-8">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              Now scanning on Base Sepolia
+            </div>
+
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+              <span className="text-zinc-900 dark:text-zinc-100">Trust, but </span>
+              <span className="gradient-text">verify.</span>
+            </h1>
+
+            <p className="text-lg sm:text-xl text-zinc-500 max-w-2xl mx-auto mb-3">
+              Scan AI agent skills for vulnerabilities, prompt injection,
+              data exfiltration, and malicious patterns before you install them.
+            </p>
+            <p className="text-sm text-zinc-400 mb-12">
+              10 free scans per day. Full reports via x402 micropayment.
+            </p>
+
+            <ScanForm />
+          </div>
+        </section>
+
+        {/* Stats */}
+        <section className="border-y border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+          <div className="max-w-5xl mx-auto px-6 py-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {STATS.map((stat) => (
+                <div key={stat.label}>
+                  <p className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section className="max-w-5xl mx-auto px-6 py-20">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-12 text-center">
+            How it works
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "1",
+                title: "Paste a skill URL",
+                desc: "GitHub repo, raw URL, or SkillsMP link. We fetch and parse the SKILL.md and any bundled scripts.",
+              },
+              {
+                step: "2",
+                title: "Static + AI analysis",
+                desc: "7 rule-based security checks plus deep LLM review for hidden instructions, obfuscation, and social engineering.",
+              },
+              {
+                step: "3",
+                title: "Get a trust score",
+                desc: "Score 0-100 with detailed findings. Green = safe, yellow = caution, red = danger.",
+              },
+            ].map((item) => (
+              <div key={item.step} className="relative text-center group">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
+                  <span className="text-white font-bold text-lg">{item.step}</span>
+                </div>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2 text-lg">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* What we check */}
+        <section className="bg-zinc-50/50 dark:bg-zinc-900/50 border-y border-zinc-200 dark:border-zinc-800">
+          <div className="max-w-5xl mx-auto px-6 py-20">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-12 text-center">
+              What we scan for
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {CHECKS.map((item) => (
+                <div
+                  key={item.label}
+                  className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:border-blue-300 dark:hover:border-blue-800 transition-colors group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-3 font-mono text-sm text-zinc-500 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 transition-colors">
+                    {item.icon}
+                  </div>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
+                    {item.label}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="max-w-5xl mx-auto px-6 py-20 text-center">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-3">
+            For AI agents: pay-per-scan via x402
+          </h2>
+          <p className="text-zinc-500 mb-8 max-w-xl mx-auto">
+            Integrate Vigil into your agent pipeline. Pay $0.02 USDC per scan via HTTP-native micropayments on Base. No API keys needed.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <div className="inline-flex gap-3">
+            <a
+              href="/auditor"
+              className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white font-medium text-sm transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
+            >
+              Become an Auditor
+            </a>
+            <a
+              href="/tokenomics"
+              className="px-5 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-colors"
+            >
+              View Tokenomics
+            </a>
+          </div>
+        </section>
       </main>
+
+      <Footer />
     </div>
   );
 }
