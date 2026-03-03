@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldLogo } from "./ShieldLogo";
+import { Eye, Activity, Cpu } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Scan" },
@@ -14,20 +14,24 @@ export function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-lg">
-      <div className="max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <ShieldLogo
-            size={28}
-            className="drop-shadow-sm group-hover:drop-shadow-md transition-all duration-200"
-          />
-          <span className="font-bold text-lg text-zinc-900 dark:text-zinc-100">
-            Vigil
-          </span>
-          <span className="font-light text-lg text-zinc-400">
-            Protocol
+    <header className="border-b border-primary/30 p-4 flex items-center justify-between sticky top-0 bg-background/90 backdrop-blur z-[60]">
+      <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
+          <Eye className="w-8 h-8 text-primary animate-pulse" />
+          <span className="font-display font-bold text-xl tracking-widest text-primary glitch-text">
+            VIGIL
           </span>
         </Link>
+      </div>
+      <div className="flex gap-4 items-center font-mono text-sm">
+        <div className="hidden md:flex gap-4 mr-4 border-r border-primary/30 pr-4">
+          <span className="text-muted-foreground flex items-center gap-2">
+            <Activity className="w-4 h-4" /> NET: BASE
+          </span>
+          <span className="text-muted-foreground flex items-center gap-2">
+            <Cpu className="w-4 h-4" /> STATUS: ONLINE
+          </span>
+        </div>
         <nav className="flex items-center gap-1">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
@@ -35,10 +39,10 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+                className={`px-3 py-1.5 text-xs uppercase font-bold tracking-wider transition-colors ${
                   isActive
-                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium"
-                    : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-primary/60 hover:bg-primary/10 hover:text-primary"
                 }`}
               >
                 {item.label}

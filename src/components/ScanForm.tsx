@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Terminal, ChevronRight, Activity } from "lucide-react";
 import type { Finding } from "@/lib/database.types";
 import { FindingCard } from "./FindingCard";
 import { ScoreBadge } from "./ScoreBadge";
@@ -57,39 +58,48 @@ export function ScanForm() {
   const passedFindings = result?.findings.filter((f) => f.passed) || [];
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-3xl">
       {/* Search bar */}
-      <form onSubmit={handleScan} className="relative">
-        <div className="flex gap-2 p-2 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg shadow-zinc-200/50 dark:shadow-zinc-900/50">
+      <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 relative">
+          <Terminal className="absolute left-3 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
           <input
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://github.com/user/skill-repo"
-            className="flex-1 px-4 py-3 bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none font-mono text-sm"
+            placeholder="Paste GitHub repo or skill URL..."
+            className="w-full bg-black border-2 border-primary/50 text-primary px-10 py-4 font-mono focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition-all placeholder:text-primary/30"
             required
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:from-zinc-400 disabled:to-zinc-500 text-white font-medium transition-all cursor-pointer disabled:cursor-not-allowed text-sm shadow-sm"
-          >
-            {loading ? "Scanning..." : "Scan"}
-          </button>
         </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="brutal-border bg-primary text-black font-display font-bold text-xl px-8 py-4 uppercase flex items-center justify-center gap-2 min-w-[160px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <>
+              <Activity className="animate-spin w-5 h-5" /> SCANNING
+            </>
+          ) : (
+            <>
+              SCAN <ChevronRight className="w-5 h-5" />
+            </>
+          )}
+        </button>
       </form>
 
       {/* Loading state */}
       {loading && (
         <div className="text-center py-16">
           <div className="relative inline-block">
-            <div className="w-12 h-12 rounded-full border-4 border-zinc-200 dark:border-zinc-700" />
-            <div className="absolute inset-0 w-12 h-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
+            <div className="w-12 h-12 border-4 border-primary/20" />
+            <div className="absolute inset-0 w-12 h-12 border-4 border-primary border-t-transparent animate-spin" />
           </div>
-          <p className="text-zinc-500 mt-4 font-medium">
+          <p className="text-primary mt-4 font-mono font-bold uppercase tracking-wider">
             Analyzing skill for security vulnerabilities...
           </p>
-          <p className="text-zinc-400 text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1 font-mono">
             Static analysis + AI review. This may take 15-30 seconds.
           </p>
         </div>
@@ -97,13 +107,15 @@ export function ScanForm() {
 
       {/* Error state */}
       {error && (
-        <div className="mt-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 flex items-start gap-3">
-          <span className="text-red-500 text-lg leading-none mt-0.5">!</span>
+        <div className="mt-6 p-4 border-2 border-destructive bg-destructive/10 flex items-start gap-3">
+          <span className="text-destructive text-lg leading-none mt-0.5 font-bold">
+            !
+          </span>
           <div>
-            <p className="font-medium text-red-800 dark:text-red-200 text-sm">
+            <p className="font-bold text-destructive text-sm uppercase tracking-wider">
               Scan failed
             </p>
-            <p className="text-red-600 dark:text-red-400 text-sm mt-0.5">
+            <p className="text-destructive/80 text-sm mt-0.5 font-mono">
               {error}
             </p>
           </div>
@@ -114,26 +126,26 @@ export function ScanForm() {
       {result && (
         <div className="mt-8 space-y-6 animate-[fadeIn_0.3s_ease-out]">
           {/* Score header */}
-          <div className="flex items-center justify-between p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+          <div className="flex items-center justify-between p-6 border border-primary/30 bg-card">
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+              <h2 className="text-xl font-bold text-primary truncate font-display uppercase tracking-wider">
                 {result.skillName}
               </h2>
-              <p className="text-sm text-zinc-500 font-mono mt-1 truncate">
+              <p className="text-sm text-muted-foreground font-mono mt-1 truncate">
                 {result.skillUrl}
               </p>
               <div className="flex items-center gap-3 mt-2">
                 {result.cached && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-500">
-                    Cached
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-primary/30 text-xs text-muted-foreground font-mono">
+                    CACHED
                   </span>
                 )}
                 {result.tier === "free" && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs text-blue-600 dark:text-blue-400">
-                    Free tier (top 3 findings)
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-accent/50 text-xs text-accent font-mono">
+                    FREE TIER (TOP 3)
                   </span>
                 )}
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-muted-foreground font-mono">
                   {new Date(result.scannedAt).toLocaleString()}
                 </span>
               </div>
@@ -146,7 +158,7 @@ export function ScanForm() {
           {/* Failed findings */}
           {failedFindings.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-3">
+              <h3 className="text-sm font-bold text-destructive uppercase tracking-wider mb-3 font-display">
                 Issues Found ({failedFindings.length})
               </h3>
               <div className="space-y-3">
@@ -160,19 +172,19 @@ export function ScanForm() {
           {/* Passed checks */}
           {passedFindings.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide mb-3">
+              <h3 className="text-sm font-bold text-primary uppercase tracking-wider mb-3 font-display">
                 Passed Checks ({passedFindings.length})
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {passedFindings.map((f, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 p-3 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/50 text-sm"
+                    className="flex items-center gap-2 p-3 border border-primary/30 bg-primary/5 text-sm"
                   >
-                    <span className="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 flex items-center justify-center text-xs">
+                    <span className="w-5 h-5 bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
                       &#10003;
                     </span>
-                    <span className="font-medium text-green-800 dark:text-green-300 text-xs truncate">
+                    <span className="font-mono text-primary/80 text-xs truncate">
                       {f.name}
                     </span>
                   </div>

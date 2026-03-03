@@ -1,45 +1,41 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ShieldLogo } from "@/components/ShieldLogo";
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
+    <div className="min-h-screen selection:bg-primary selection:text-primary-foreground">
       <Header />
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-3 mb-2">
-          <ShieldLogo size={28} />
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-            API Documentation
-          </h1>
-        </div>
-        <p className="text-zinc-500 dark:text-zinc-400 mb-10">
-          Integrate Vigil into your agent pipeline. Scan skills programmatically before installing them.
+        <h1 className="text-3xl font-bold mb-2">API DOCUMENTATION</h1>
+        <p className="text-muted-foreground font-mono mb-10">
+          Integrate Vigil into your agent pipeline. Scan skills programmatically
+          before installing them.
         </p>
 
         {/* Free Scan */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+            <span className="px-2 py-0.5 text-xs font-bold bg-primary/20 text-primary border border-primary/40 font-mono">
               FREE
             </span>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              POST /api/scan
-            </h2>
+            <h2 className="text-xl font-bold">POST /API/SCAN</h2>
           </div>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-4">
-            Free scan with Llama 3.3 70B analysis. Rate limited to 10 scans/day per IP. Returns top 3 findings.
+          <p className="text-muted-foreground font-mono mb-4 text-sm">
+            Free scan with Llama 3.3 70B analysis. Rate limited to 10 scans/day
+            per IP. Returns top 3 findings.
           </p>
-          <div className="rounded-lg bg-zinc-950 dark:bg-zinc-900 border border-zinc-800 p-4 mb-4 overflow-x-auto">
-            <pre className="text-sm text-zinc-300">
+          <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
+            <pre className="text-sm text-primary/80 font-mono">
               <code>{`curl -X POST https://vigil-protocol.vercel.app/api/scan \\
   -H "Content-Type: application/json" \\
   -d '{"skillUrl": "https://github.com/user/repo/blob/main/SKILL.md"}'`}</code>
             </pre>
           </div>
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Response</h3>
-          <div className="rounded-lg bg-zinc-950 dark:bg-zinc-900 border border-zinc-800 p-4 overflow-x-auto">
-            <pre className="text-sm text-zinc-300">
+          <h3 className="text-sm font-bold text-primary/60 mb-2 font-display uppercase tracking-wider">
+            Response
+          </h3>
+          <div className="border border-primary/30 bg-black p-4 overflow-x-auto">
+            <pre className="text-sm text-primary/80 font-mono">
               <code>{`{
   "skillId": "uuid",
   "skillName": "My Skill",
@@ -64,18 +60,17 @@ export default function DocsPage() {
         {/* Paid Scan */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+            <span className="px-2 py-0.5 text-xs font-bold bg-accent/20 text-accent border border-accent/40 font-mono">
               x402
             </span>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              POST /api/v1/scan
-            </h2>
+            <h2 className="text-xl font-bold">POST /API/V1/SCAN</h2>
           </div>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-4">
-            Deep scan with Claude Sonnet. Pay $0.02 USDC on Base via x402 micropayment. No API key needed — payment is in the HTTP header.
+          <p className="text-muted-foreground font-mono mb-4 text-sm">
+            Deep scan with Claude Sonnet. Pay $0.02 USDC on Base via x402
+            micropayment. No API key needed — payment is in the HTTP header.
           </p>
-          <div className="rounded-lg bg-zinc-950 dark:bg-zinc-900 border border-zinc-800 p-4 mb-4 overflow-x-auto">
-            <pre className="text-sm text-zinc-300">
+          <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
+            <pre className="text-sm text-primary/80 font-mono">
               <code>{`# x402-enabled clients handle payment automatically.
 # The endpoint returns a 402 Payment Required with payment details.
 # Your x402 client pays and retries — all in one request.
@@ -85,26 +80,26 @@ curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
   -d '{"skillUrl": "https://github.com/user/repo/blob/main/SKILL.md"}'`}</code>
             </pre>
           </div>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Returns full report with all findings, severity breakdown, and recommendation. No rate limit.
+          <p className="text-sm text-muted-foreground font-mono">
+            Returns full report with all findings, severity breakdown, and
+            recommendation. No rate limit.
           </p>
         </section>
 
         {/* Score Lookup */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+            <span className="px-2 py-0.5 text-xs font-bold bg-primary/20 text-primary border border-primary/40 font-mono">
               FREE
             </span>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              GET /api/score
-            </h2>
+            <h2 className="text-xl font-bold">GET /API/SCORE</h2>
           </div>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-4">
-            Look up a cached trust score for a previously scanned skill. Instant, no rate limit.
+          <p className="text-muted-foreground font-mono mb-4 text-sm">
+            Look up a cached trust score for a previously scanned skill.
+            Instant, no rate limit.
           </p>
-          <div className="rounded-lg bg-zinc-950 dark:bg-zinc-900 border border-zinc-800 p-4 overflow-x-auto">
-            <pre className="text-sm text-zinc-300">
+          <div className="border border-primary/30 bg-black p-4 overflow-x-auto">
+            <pre className="text-sm text-primary/80 font-mono">
               <code>{`curl "https://vigil-protocol.vercel.app/api/score?url=https://github.com/user/repo/blob/main/SKILL.md"`}</code>
             </pre>
           </div>
@@ -113,18 +108,17 @@ curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
         {/* MCP */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+            <span className="px-2 py-0.5 text-xs font-bold bg-destructive/20 text-destructive border border-destructive/40 font-mono">
               MCP
             </span>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Claude Code Integration
-            </h2>
+            <h2 className="text-xl font-bold">CLAUDE CODE INTEGRATION</h2>
           </div>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-4">
-            Use Vigil directly inside Claude Code via MCP. Add this to your MCP config:
+          <p className="text-muted-foreground font-mono mb-4 text-sm">
+            Use Vigil directly inside Claude Code via MCP. Add this to your MCP
+            config:
           </p>
-          <div className="rounded-lg bg-zinc-950 dark:bg-zinc-900 border border-zinc-800 p-4 mb-4 overflow-x-auto">
-            <pre className="text-sm text-zinc-300">
+          <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
+            <pre className="text-sm text-primary/80 font-mono">
               <code>{`{
   "mcpServers": {
     "vigil": {
@@ -135,11 +129,18 @@ curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
 }`}</code>
             </pre>
           </div>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Then use <code className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-sm">vigil_scan</code> or <code className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-sm">vigil_score</code> tools in your Claude Code session.
+          <p className="text-muted-foreground font-mono text-sm">
+            Then use{" "}
+            <code className="px-1.5 py-0.5 border border-primary/30 bg-black text-primary text-sm">
+              vigil_scan
+            </code>{" "}
+            or{" "}
+            <code className="px-1.5 py-0.5 border border-primary/30 bg-black text-primary text-sm">
+              vigil_score
+            </code>{" "}
+            tools in your Claude Code session.
           </p>
         </section>
-
       </main>
       <Footer />
     </div>

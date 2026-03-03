@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ShieldLogo } from "@/components/ShieldLogo";
 
 interface AuditorData {
   wallet_address: string;
@@ -80,31 +79,24 @@ export default function AuditorPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen selection:bg-primary selection:text-primary-foreground">
       <Header />
 
-      <main className="flex-1 max-w-3xl mx-auto px-6 py-12 w-full">
-        <div className="flex items-center gap-3 mb-2">
-          <ShieldLogo size={28} />
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-            Become an Auditor
-          </h1>
-        </div>
-        <p className="text-zinc-500 mb-8">
+      <main className="max-w-3xl mx-auto px-6 py-12 w-full">
+        <h1 className="text-3xl font-bold mb-2">BECOME AN AUDITOR</h1>
+        <p className="text-muted-foreground font-mono mb-8">
           Stake $VIGIL tokens, verify AI skills, and earn fees for every scan.
         </p>
 
         {/* Registration form */}
         <form
           onSubmit={handleRegister}
-          className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 mb-8"
+          className="p-6 border border-primary/30 bg-card mb-8"
         >
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-            Register as Auditor
-          </h2>
+          <h2 className="text-lg font-bold mb-4">REGISTER AS AUDITOR</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-mono text-muted-foreground mb-1">
                 Wallet Address
               </label>
               <input
@@ -112,12 +104,12 @@ export default function AuditorPage() {
                 value={wallet}
                 onChange={(e) => setWallet(e.target.value)}
                 placeholder="0x..."
-                className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-sm"
+                className="w-full px-4 py-3 bg-black border-2 border-primary/50 text-primary font-mono text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition-all placeholder:text-primary/30"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-mono text-muted-foreground mb-1">
                 Stake Amount ($VIGIL)
               </label>
               <input
@@ -126,66 +118,70 @@ export default function AuditorPage() {
                 onChange={(e) => setStakeAmount(e.target.value)}
                 placeholder="1000"
                 min="1000"
-                className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-sm"
+                className="w-full px-4 py-3 bg-black border-2 border-primary/50 text-primary font-mono text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition-all placeholder:text-primary/30"
                 required
               />
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1 font-mono">
                 Minimum 1,000 $VIGIL (Bronze tier). Higher stakes unlock more
                 audit types.
               </p>
             </div>
-            <div className="flex gap-4 text-sm text-zinc-500">
-              <span>Bronze: 1,000</span>
-              <span>Silver: 5,000</span>
-              <span>Gold: 25,000</span>
-              <span>Platinum: 100,000</span>
+            <div className="flex gap-4 text-sm text-muted-foreground font-mono">
+              <span className="text-amber-600">Bronze: 1,000</span>
+              <span className="text-zinc-400">Silver: 5,000</span>
+              <span className="text-yellow-500">Gold: 25,000</span>
+              <span className="text-cyan-400">Platinum: 100,000</span>
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:from-zinc-500 disabled:to-zinc-500 text-white font-medium transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 cursor-pointer disabled:cursor-not-allowed"
+              className="brutal-border bg-primary text-black font-display font-bold text-sm px-6 py-3 uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/80 transition-colors"
             >
-              {loading ? "Registering..." : "Register & Stake"}
+              {loading ? "REGISTERING..." : "[ REGISTER & STAKE ]"}
             </button>
           </div>
           {message && (
-            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              {message}
-            </p>
+            <p className="mt-3 text-sm font-mono text-primary/80">{message}</p>
           )}
         </form>
 
         {/* Dashboard */}
         {dashboard && (
           <div className="space-y-6">
-            <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-                Dashboard
-              </h2>
+            <div className="p-6 border border-primary/30">
+              <h2 className="text-lg font-bold mb-4">DASHBOARD</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <p className="text-sm text-zinc-500">Tier</p>
+                  <p className="text-sm text-muted-foreground font-mono">
+                    Tier
+                  </p>
                   <p
-                    className={`text-xl font-bold capitalize ${TIER_COLORS[dashboard.auditor.tier] || ""}`}
+                    className={`text-xl font-bold font-display uppercase ${TIER_COLORS[dashboard.auditor.tier] || "text-primary"}`}
                   >
                     {dashboard.auditor.tier}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-500">Reputation</p>
-                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                  <p className="text-sm text-muted-foreground font-mono">
+                    Reputation
+                  </p>
+                  <p className="text-xl font-bold text-primary font-mono">
                     {dashboard.auditor.reputation_score}/100
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-500">Active Audits</p>
-                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                  <p className="text-sm text-muted-foreground font-mono">
+                    Active
+                  </p>
+                  <p className="text-xl font-bold text-primary font-mono">
                     {dashboard.activeAudits}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-500">Completed</p>
-                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                  <p className="text-sm text-muted-foreground font-mono">
+                    Completed
+                  </p>
+                  <p className="text-xl font-bold text-primary font-mono">
                     {dashboard.completedAudits}
                   </p>
                 </div>
@@ -193,31 +189,31 @@ export default function AuditorPage() {
             </div>
 
             {dashboard.recentAssignments.length > 0 && (
-              <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-                  Recent Assignments
+              <div className="p-6 border border-primary/30">
+                <h3 className="text-lg font-bold mb-4">
+                  RECENT ASSIGNMENTS
                 </h3>
                 <div className="space-y-3">
                   {dashboard.recentAssignments.map((a) => (
                     <div
                       key={a.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800"
+                      className="flex items-center justify-between p-3 bg-black/40 border border-primary/20"
                     >
                       <div>
-                        <p className="text-sm font-mono text-zinc-700 dark:text-zinc-300 truncate max-w-md">
+                        <p className="text-sm font-mono text-primary/80 truncate max-w-md">
                           {a.skill_url}
                         </p>
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-muted-foreground font-mono">
                           {new Date(a.assigned_at).toLocaleDateString()}
                         </p>
                       </div>
                       <span
-                        className={`text-xs px-2 py-1 rounded font-medium ${
+                        className={`text-xs px-2 py-1 font-bold font-mono uppercase ${
                           a.status === "completed"
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            ? "bg-primary/20 text-primary border border-primary/40"
                             : a.status === "disputed"
-                              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                              ? "bg-destructive/20 text-destructive border border-destructive/40"
+                              : "bg-accent/20 text-accent border border-accent/40"
                         }`}
                       >
                         {a.status}

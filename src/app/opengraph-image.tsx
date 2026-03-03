@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Vigil Protocol — AI Skill Verification";
+export const alt = "VIGIL PROTOCOL — AI Skill Verification";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -16,68 +16,61 @@ export default function OGImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#09090b",
-          fontFamily: "system-ui, sans-serif",
+          backgroundColor: "#0a0a0f",
+          fontFamily: "monospace",
+          backgroundImage:
+            "linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
         }}
       >
-        {/* Shield */}
-        <svg
-          width="120"
-          height="120"
-          viewBox="0 0 64 64"
-          fill="none"
-        >
-          <defs>
-            <linearGradient id="og-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" />
-              <stop offset="100%" stopColor="#8b5cf6" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M32 4L8 16v16c0 14.4 10.24 27.84 24 32 13.76-4.16 24-17.6 24-32V16L32 4z"
-            fill="url(#og-grad)"
-          />
-          <path d="M24 20l8 20 8-20h-5l-3 10-3-10h-5z" fill="white" />
-        </svg>
-
-        {/* Title */}
+        {/* Eye icon */}
         <div
           style={{
+            width: "80px",
+            height: "80px",
+            borderRadius: "50%",
+            border: "3px solid #00ff00",
             display: "flex",
-            alignItems: "baseline",
-            gap: "12px",
-            marginTop: "32px",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "24px",
+            boxShadow: "0 0 30px rgba(0, 255, 0, 0.3)",
           }}
         >
-          <span
+          <div
             style={{
-              fontSize: "48px",
-              fontWeight: 700,
-              color: "#fafafa",
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              backgroundColor: "#00ff00",
             }}
-          >
-            Vigil
-          </span>
-          <span
-            style={{
-              fontSize: "48px",
-              fontWeight: 300,
-              color: "#a1a1aa",
-            }}
-          >
-            Protocol
-          </span>
+          />
         </div>
+
+        {/* Title */}
+        <span
+          style={{
+            fontSize: "56px",
+            fontWeight: 900,
+            color: "#00ff00",
+            letterSpacing: "0.15em",
+            textShadow:
+              "0.05em 0 0 rgba(255,0,0,0.5), -0.025em -0.05em 0 rgba(0,255,0,0.5), 0.025em 0.05em 0 rgba(0,0,255,0.5)",
+          }}
+        >
+          VIGIL PROTOCOL
+        </span>
 
         {/* Subtitle */}
         <span
           style={{
             fontSize: "22px",
-            color: "#71717a",
+            color: "#337a33",
             marginTop: "16px",
+            letterSpacing: "0.1em",
           }}
         >
-          AI Skill Verification on Base
+          TRUST, BUT VERIFY // AI SKILL VERIFICATION
         </span>
       </div>
     ),

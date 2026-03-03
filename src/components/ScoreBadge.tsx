@@ -8,24 +8,20 @@ interface ScoreBadgeProps {
 export function ScoreBadge({ score, size = "lg" }: ScoreBadgeProps) {
   let ringColor: string;
   let textColor: string;
-  let bgColor: string;
   let label: string;
 
   if (score >= 70) {
-    ringColor = "stroke-green-500";
-    textColor = "text-green-600 dark:text-green-400";
-    bgColor = "bg-green-50 dark:bg-green-950/30";
-    label = "Safe";
+    ringColor = "stroke-[hsl(120,100%,50%)]";
+    textColor = "text-primary";
+    label = "SAFE";
   } else if (score >= 40) {
-    ringColor = "stroke-yellow-500";
-    textColor = "text-yellow-600 dark:text-yellow-400";
-    bgColor = "bg-yellow-50 dark:bg-yellow-950/30";
-    label = "Caution";
+    ringColor = "stroke-[hsl(60,100%,50%)]";
+    textColor = "text-accent";
+    label = "DEGEN";
   } else {
-    ringColor = "stroke-red-500";
-    textColor = "text-red-600 dark:text-red-400";
-    bgColor = "bg-red-50 dark:bg-red-950/30";
-    label = "Danger";
+    ringColor = "stroke-[hsl(0,100%,50%)]";
+    textColor = "text-destructive";
+    label = "REKT";
   }
 
   const isLarge = size === "lg";
@@ -36,7 +32,7 @@ export function ScoreBadge({ score, size = "lg" }: ScoreBadgeProps) {
   const dashOffset = circumference - (score / 100) * circumference;
 
   return (
-    <div className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${bgColor}`}>
+    <div className="flex flex-col items-center gap-1.5 p-3 border border-primary/20 bg-black/40">
       <div className="relative">
         <svg width={svgSize} height={svgSize} className="-rotate-90">
           <circle
@@ -45,7 +41,7 @@ export function ScoreBadge({ score, size = "lg" }: ScoreBadgeProps) {
             r={radius}
             fill="none"
             strokeWidth={strokeWidth}
-            className="stroke-zinc-200 dark:stroke-zinc-700"
+            className="stroke-primary/20"
           />
           <circle
             cx={svgSize / 2}
@@ -53,21 +49,23 @@ export function ScoreBadge({ score, size = "lg" }: ScoreBadgeProps) {
             r={radius}
             fill="none"
             strokeWidth={strokeWidth}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             strokeDasharray={circumference}
             strokeDashoffset={dashOffset}
             className={`${ringColor} transition-all duration-1000 ease-out`}
           />
         </svg>
         <span
-          className={`absolute inset-0 flex items-center justify-center font-bold ${textColor} ${
+          className={`absolute inset-0 flex items-center justify-center font-bold font-mono ${textColor} ${
             isLarge ? "text-2xl" : "text-base"
           }`}
         >
           {score}
         </span>
       </div>
-      <span className={`text-xs font-semibold uppercase tracking-wide ${textColor}`}>
+      <span
+        className={`text-xs font-bold uppercase tracking-widest font-display ${textColor}`}
+      >
         {label}
       </span>
     </div>
