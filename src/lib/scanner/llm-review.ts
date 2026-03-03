@@ -1,14 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import type { Finding } from "../database.types";
 
-const client = new Anthropic();
-
-const MODELS = {
-  free: "claude-haiku-4-5-20251001",   // ~$0.007/scan — fast, cheap
-  paid: "claude-sonnet-4-20250514",     // ~$0.03/scan  — deeper analysis
-} as const;
-
-export type ScanTier = keyof typeof MODELS;
+export type ScanTier = "free" | "paid";
 
 const SYSTEM_PROMPT = `You are a security auditor specialized in analyzing AI agent skills and plugins. Your job is to identify security vulnerabilities, malicious patterns, and risks in skill definition files.
 
@@ -32,40 +26,69 @@ If no issues are found in a category, include a passing finding for it.
 
 IMPORTANT: Return ONLY a valid JSON array. No markdown, no explanation outside the JSON.`;
 
+/**
+ * Free tier: Groq (Llama 3.3 70B) — free, fast
+ * Paid tier: Anthropic (Claude Sonnet) — deeper analysis
+ */
+
+async function runGroqReview(content: string): Promise<string> {
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    max_tokens: 2048,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: `Analyze this AI agent skill file for security vulnerabilities:\n\n---\n${content.slice(0, 8000)}\n---`,
+      },
+    ],
+  });
+  return completion.choices[0]?.message?.content || "";
+}
+
+async function runAnthropicReview(content: string): Promise<string> {
+  const client = new Anthropic();
+  const message = await client.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 4096,
+    system: SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Analyze this AI agent skill file for security vulnerabilities:\n\n---\n${content.slice(0, 15000)}\n---`,
+      },
+    ],
+  });
+  return message.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("");
+}
+
 export async function runLLMReview(
   content: string,
   tier: ScanTier = "free"
 ): Promise<Finding[]> {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // Free tier: Groq (free). Paid tier: Anthropic (better quality).
+  const useGroq = tier === "free";
+  const requiredKey = useGroq ? "GROQ_API_KEY" : "ANTHROPIC_API_KEY";
+
+  if (!process.env[requiredKey]) {
     return [
       {
         name: "LLM Review",
         severity: "info",
         passed: true,
-        details: "LLM review skipped: ANTHROPIC_API_KEY not configured.",
+        details: `LLM review skipped: ${requiredKey} not configured.`,
       },
     ];
   }
 
-  const model = MODELS[tier];
-
   try {
-    const message = await client.messages.create({
-      model,
-      max_tokens: tier === "paid" ? 4096 : 2048,
-      messages: [
-        {
-          role: "user",
-          content: `Analyze this AI agent skill file for security vulnerabilities:\n\n---\n${content.slice(0, tier === "paid" ? 15000 : 8000)}\n---`,
-        },
-      ],
-      system: SYSTEM_PROMPT,
-    });
-
-    const text = message.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("");
+    const text = useGroq
+      ? await runGroqReview(content)
+      : await runAnthropicReview(content);
 
     // Parse JSON from response
     const jsonMatch = text.match(/\[[\s\S]*\]/);
@@ -81,7 +104,7 @@ export async function runLLMReview(
     }
 
     const findings: Finding[] = JSON.parse(jsonMatch[0]);
-    const modelLabel = tier === "paid" ? "AI-Deep" : "AI";
+    const modelLabel = useGroq ? "AI" : "AI-Deep";
 
     // Validate and sanitize findings
     return findings
