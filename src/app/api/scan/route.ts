@@ -92,11 +92,13 @@ export async function POST(request: NextRequest) {
           skillName: cached.name,
           skillUrl: cached.url,
           score: cached.score,
+          safe: cached.score >= 70,
+          threshold: 70,
           findings: limitFindings(allFindings),
           scannedAt: cached.scanned_at,
           cached: true,
           tier: "free",
-          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with x402 payment for Sonnet deep review + full report.",
+          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL or $VIGIL payment for Sonnet deep review + full report.",
         },
         {
           headers: {
@@ -134,11 +136,13 @@ export async function POST(request: NextRequest) {
           skillName: result.skillName,
           skillUrl: result.skillUrl,
           score: result.score,
+          safe: result.score >= 70,
+          threshold: 70,
           findings: limitFindings(result.findings),
           scannedAt: result.scannedAt,
           cached: false,
           tier: "free",
-          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with x402 payment for Sonnet deep review + full report.",
+          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL or $VIGIL payment for Sonnet deep review + full report.",
         },
         {
           headers: {
@@ -172,11 +176,13 @@ export async function POST(request: NextRequest) {
         skillName: result.skillName,
         skillUrl: result.skillUrl,
         score: result.score,
+        safe: result.score >= 70,
+        threshold: 70,
         findings: limitFindings(result.findings),
         scannedAt: result.scannedAt,
         cached: false,
         tier: "free",
-        note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with x402 payment for Sonnet deep review + full report.",
+        note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL or $VIGIL payment for Sonnet deep review + full report.",
       },
       {
         headers: {

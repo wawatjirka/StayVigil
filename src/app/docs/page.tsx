@@ -61,28 +61,33 @@ export default function DocsPage() {
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-4">
             <span className="px-2 py-0.5 text-xs font-bold bg-accent/20 text-accent border border-accent/40 font-mono">
-              x402
+              PAID
             </span>
             <h2 className="text-xl font-bold">POST /API/V1/SCAN</h2>
           </div>
           <p className="text-muted-foreground font-mono mb-4 text-sm">
-            Deep scan with Claude Sonnet. Pay $0.02 USDC on Base via x402
-            micropayment. No API key needed — payment is in the HTTP header.
+            Deep scan with Claude Sonnet. Pay with SOL or $VIGIL on Solana.
+            No API key needed — send a transaction and include the signature.
           </p>
           <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
             <pre className="text-sm text-primary/80 font-mono">
-              <code>{`# x402-enabled clients handle payment automatically.
-# The endpoint returns a 402 Payment Required with payment details.
-# Your x402 client pays and retries — all in one request.
-
+              <code>{`# Step 1: Get payment details (returns 402 with treasury + prices)
 curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
   -H "Content-Type: application/json" \\
-  -d '{"skillUrl": "https://github.com/user/repo/blob/main/SKILL.md"}'`}</code>
+  -d '{"skillUrl": "https://github.com/user/repo/blob/main/SKILL.md"}'
+
+# Step 2: Send SOL or $VIGIL to the treasury wallet, then retry with txSignature
+curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
+  -H "Content-Type: application/json" \\
+  -d '{"skillUrl": "...", "txSignature": "5K7x...", "paymentType": "sol"}'`}</code>
             </pre>
           </div>
           <p className="text-sm text-muted-foreground font-mono">
             Returns full report with all findings, severity breakdown, and
-            recommendation. No rate limit.
+            recommendation. No rate limit. Accepts{" "}
+            <code className="px-1.5 py-0.5 border border-primary/30 bg-black text-primary text-sm">
+              paymentType: &quot;sol&quot; | &quot;vigil&quot;
+            </code>
           </p>
         </section>
 

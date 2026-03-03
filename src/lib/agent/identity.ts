@@ -13,7 +13,7 @@ export const VIGIL_AGENT_METADATA = {
     { name: "web", endpoint: "https://vigil-protocol.vercel.app/api/v1" },
     { name: "scan", endpoint: "https://vigil-protocol.vercel.app/api/scan" },
   ],
-  x402Support: true,
+  x402Support: false,
   active: true,
   supportedTrust: ["reputation"],
 };

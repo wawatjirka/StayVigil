@@ -26,7 +26,7 @@ export function Header() {
       <div className="flex gap-4 items-center font-mono text-sm">
         <div className="hidden md:flex gap-4 mr-4 border-r border-primary/30 pr-4">
           <span className="text-muted-foreground flex items-center gap-2">
-            <Activity className="w-4 h-4" /> NET: BASE
+            <Activity className="w-4 h-4" /> NET: SOLANA
           </span>
           <span className="text-muted-foreground flex items-center gap-2">
             <Cpu className="w-4 h-4" /> STATUS: ONLINE

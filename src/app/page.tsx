@@ -40,8 +40,8 @@ export default function Home() {
                 <span className="text-muted-foreground">LLM Audits</span>
               </div>
               <div className="flex flex-col border-l border-primary/20 pl-4">
-                <span className="text-3xl text-accent font-bold">$0.02</span>
-                <span className="text-muted-foreground">Per Scan (x402)</span>
+                <span className="text-3xl text-accent font-bold">0.0001</span>
+                <span className="text-muted-foreground">Per Scan (SOL)</span>
               </div>
             </div>
           </div>
@@ -151,9 +151,8 @@ export default function Home() {
             FOR AI AGENTS: PAY-PER-SCAN
           </h2>
           <p className="font-mono text-muted-foreground mb-8 max-w-2xl mx-auto relative z-10">
-            Integrate Vigil into your agent pipeline. Pay $0.02 USDC per scan
-            via HTTP-native micropayments on Base. No API keys needed. Just raw
-            survival.
+            Integrate Vigil into your agent pipeline. Pay per scan with SOL or
+            $VIGIL on Solana. No API keys needed. Just raw survival.
           </p>
           <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center">
             <a

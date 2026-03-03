@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -34,8 +36,9 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 export default function AuditorPage() {
-  const [wallet, setWallet] = useState("");
-  const [stakeAmount, setStakeAmount] = useState("");
+  const { publicKey, signMessage, connected } = useWallet();
+  const walletAddress = publicKey?.toBase58() ?? "";
+
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -45,18 +48,52 @@ export default function AuditorPage() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
+  const loadDashboard = useCallback(async () => {
+    if (!walletAddress) return;
+    try {
+      const res = await fetch(
+        `/api/auditor/dashboard?wallet=${encodeURIComponent(walletAddress)}`
+      );
+      const data = await res.json();
+      if (res.ok) setDashboard(data);
+    } catch {
+      // Ignore — auditor may not exist yet
+    }
+  }, [walletAddress]);
+
+  // Auto-load dashboard when wallet connects
+  useEffect(() => {
+    if (connected && walletAddress) {
+      loadDashboard();
+    } else {
+      setDashboard(null);
+    }
+  }, [connected, walletAddress, loadDashboard]);
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!publicKey || !signMessage) return;
     setLoading(true);
     setMessage(null);
 
     try {
+      const timestamp = Date.now();
+      const msg = `Vigil Protocol auditor registration: ${walletAddress}:${timestamp}`;
+      const messageBytes = new TextEncoder().encode(msg);
+      const signatureBytes = await signMessage(messageBytes);
+
+      // Encode signature as base58
+      const bs58 = (await import("bs58")).default;
+      const signature = bs58.encode(signatureBytes);
+
       const res = await fetch("/api/auditor/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          walletAddress: wallet,
-          stakeAmount: Number(stakeAmount),
+          walletAddress,
+          signature,
+          message: msg,
+          timestamp,
         }),
       });
       const data = await res.json();
@@ -70,19 +107,6 @@ export default function AuditorPage() {
     }
   };
 
-  const loadDashboard = async () => {
-    if (!wallet) return;
-    try {
-      const res = await fetch(
-        `/api/auditor/dashboard?wallet=${encodeURIComponent(wallet)}`
-      );
-      const data = await res.json();
-      if (res.ok) setDashboard(data);
-    } catch {
-      // Ignore — auditor may not exist yet
-    }
-  };
-
   const handleSubmitAudit = async (assignmentId: string) => {
     setSubmitLoading(true);
     setSubmitMessage(null);
@@ -93,7 +117,7 @@ export default function AuditorPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           assignmentId,
-          walletAddress: wallet,
+          walletAddress,
           score: Number(submitScore),
           report: submitReport,
         }),
@@ -126,7 +150,7 @@ export default function AuditorPage() {
       <main className="max-w-3xl mx-auto px-6 py-12 w-full">
         <h1 className="text-3xl font-bold mb-2">BECOME AN AUDITOR</h1>
         <p className="text-muted-foreground font-mono mb-8">
-          Stake $VIGIL tokens, verify AI skills, and earn fees for every scan.
+          Hold $VIGIL tokens, verify AI skills, and earn fees for every scan.
         </p>
 
         {/* Registration form */}
@@ -137,48 +161,43 @@ export default function AuditorPage() {
           <h2 className="text-lg font-bold mb-4">REGISTER AS AUDITOR</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-mono text-muted-foreground mb-1">
-                Wallet Address
+              <label className="block text-sm font-mono text-muted-foreground mb-2">
+                Connect Wallet
               </label>
-              <input
-                type="text"
-                value={wallet}
-                onChange={(e) => setWallet(e.target.value)}
-                placeholder="0x..."
-                className="w-full px-4 py-3 bg-black border-2 border-primary/50 text-primary font-mono text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition-all placeholder:text-primary/30"
-                required
+              <WalletMultiButton
+                style={{
+                  backgroundColor: "transparent",
+                  border: "2px solid rgba(0, 255, 0, 0.5)",
+                  color: "rgb(0, 255, 0)",
+                  fontFamily: "monospace",
+                  fontSize: "0.875rem",
+                  height: "auto",
+                  padding: "0.75rem 1rem",
+                }}
               />
+              {connected && walletAddress && (
+                <p className="text-xs text-primary/60 font-mono mt-2 truncate">
+                  {walletAddress}
+                </p>
+              )}
             </div>
-            <div>
-              <label className="block text-sm font-mono text-muted-foreground mb-1">
-                Stake Amount ($VIGIL)
-              </label>
-              <input
-                type="number"
-                value={stakeAmount}
-                onChange={(e) => setStakeAmount(e.target.value)}
-                placeholder="1000"
-                min="1000"
-                className="w-full px-4 py-3 bg-black border-2 border-primary/50 text-primary font-mono text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition-all placeholder:text-primary/30"
-                required
-              />
-              <p className="text-xs text-muted-foreground mt-1 font-mono">
-                Minimum 1,000 $VIGIL (Bronze tier). Higher stakes unlock more
-                audit types.
+            <div className="text-sm text-muted-foreground font-mono">
+              <p className="mb-1">
+                Your tier is determined by your $VIGIL token balance:
               </p>
-            </div>
-            <div className="flex gap-4 text-sm text-muted-foreground font-mono">
-              <span className="text-amber-600">Bronze: 1,000</span>
-              <span className="text-zinc-400">Silver: 5,000</span>
-              <span className="text-yellow-500">Gold: 25,000</span>
-              <span className="text-cyan-400">Platinum: 100,000</span>
+              <div className="flex gap-4">
+                <span className="text-amber-600">Bronze: 1,000</span>
+                <span className="text-zinc-400">Silver: 5,000</span>
+                <span className="text-yellow-500">Gold: 25,000</span>
+                <span className="text-cyan-400">Platinum: 100,000</span>
+              </div>
             </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !connected || !signMessage}
               className="brutal-border bg-primary text-black font-display font-bold text-sm px-6 py-3 uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/80 transition-colors"
             >
-              {loading ? "REGISTERING..." : "[ REGISTER & STAKE ]"}
+              {loading ? "SIGNING..." : "[ SIGN & REGISTER ]"}
             </button>
           </div>
           {message && (

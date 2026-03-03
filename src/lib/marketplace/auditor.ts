@@ -49,7 +49,7 @@ export async function registerAuditor(
     .from("auditors")
     .upsert(
       {
-        wallet_address: walletAddress.toLowerCase(),
+        wallet_address: walletAddress,
         stake_amount: stakeAmount,
         tier: getTier(stakeAmount),
         reputation_score: 50, // Start at neutral
@@ -178,7 +178,7 @@ export async function submitAudit(
   const { data: auditor } = await supabase
     .from("auditors")
     .select("*")
-    .eq("wallet_address", walletAddress.toLowerCase())
+    .eq("wallet_address", walletAddress)
     .single();
 
   if (!auditor) throw new Error("Auditor not found");
@@ -331,7 +331,7 @@ export async function getAuditorDashboard(walletAddress: string) {
   const { data: auditor } = await supabase
     .from("auditors")
     .select("*")
-    .eq("wallet_address", walletAddress.toLowerCase())
+    .eq("wallet_address", walletAddress)
     .single();
 
   if (!auditor) return null;

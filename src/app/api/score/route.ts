@@ -14,6 +14,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const thresholdParam = searchParams.get("threshold");
+    const threshold = thresholdParam ? Math.max(0, Math.min(100, parseInt(thresholdParam, 10) || 70)) : 70;
+
     const supabase = createServerClient();
 
     let query = supabase.from("skills").select("*");
@@ -42,6 +45,8 @@ export async function GET(request: NextRequest) {
       skillName: skill.name,
       skillUrl: skill.url,
       score: skill.score,
+      safe: skill.score >= threshold,
+      threshold,
       report: skill.report,
       findings: (findings || []).map((f) => ({
         name: f.check_name,

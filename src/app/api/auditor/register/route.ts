@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerAuditor } from "@/lib/marketplace/auditor";
+import {
+  isValidSolanaAddress,
+  verifyWalletSignature,
+  getVigilTokenBalance,
+} from "@/lib/solana-verify";
+
+const SIGNATURE_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
- * POST /api/auditor/register — Register as an auditor after staking on-chain.
+ * POST /api/auditor/register — Register as an auditor with wallet signature verification.
  */
 export async function POST(request: NextRequest) {
   try {
-    const { walletAddress, stakeAmount } = await request.json();
+    const { walletAddress, signature, message, timestamp } =
+      await request.json();
 
     if (!walletAddress || typeof walletAddress !== "string") {
       return NextResponse.json(
@@ -15,18 +23,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!stakeAmount || typeof stakeAmount !== "number" || stakeAmount < 1000) {
+    if (!isValidSolanaAddress(walletAddress)) {
       return NextResponse.json(
-        { error: "Minimum stake is 1,000 $VIGIL" },
+        { error: "Invalid Solana wallet address" },
         { status: 400 }
       );
     }
+
+    if (!signature || !message || !timestamp) {
+      return NextResponse.json(
+        { error: "Missing signature, message, or timestamp" },
+        { status: 400 }
+      );
+    }
+
+    // Validate timestamp freshness
+    const age = Date.now() - timestamp;
+    if (age > SIGNATURE_MAX_AGE_MS || age < 0) {
+      return NextResponse.json(
+        { error: "Signature expired — please try again" },
+        { status: 400 }
+      );
+    }
+
+    // Validate message format
+    const expectedMessage = `Vigil Protocol auditor registration: ${walletAddress}:${timestamp}`;
+    if (message !== expectedMessage) {
+      return NextResponse.json(
+        { error: "Invalid message format" },
+        { status: 400 }
+      );
+    }
+
+    // Verify Ed25519 signature
+    const valid = verifyWalletSignature(walletAddress, message, signature);
+    if (!valid) {
+      return NextResponse.json(
+        { error: "Invalid wallet signature" },
+        { status: 401 }
+      );
+    }
+
+    // Check on-chain $VIGIL token balance for tier
+    const balance = await getVigilTokenBalance(walletAddress);
+    // null = demo mode (mint not set), default to bronze minimum
+    const stakeAmount = balance ?? 1000;
 
     const auditor = await registerAuditor(walletAddress, stakeAmount);
 
     return NextResponse.json({
       message: "Auditor registered successfully",
       auditor,
+      demoMode: balance === null,
     });
   } catch (error) {
     console.error("Auditor registration error:", error);

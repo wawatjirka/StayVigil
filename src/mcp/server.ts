@@ -41,7 +41,7 @@ const TOOLS = [
   {
     name: "vigil_scan",
     description:
-      "Scan an AI agent skill for security vulnerabilities before installing it. Returns a trust score (0-100) and detailed findings about dangerous patterns, prompt injection, data exfiltration, and more.",
+      "Scan an AI agent skill for security vulnerabilities before installing it. Returns a trust score (0-100) and detailed findings about dangerous patterns, prompt injection, data exfiltration, and more. Optionally provide a Solana transaction signature for a paid deep scan (Sonnet).",
     inputSchema: {
       type: "object",
       properties: {
@@ -49,6 +49,17 @@ const TOOLS = [
           type: "string",
           description:
             "URL of the skill to scan. Supports GitHub URLs, raw file URLs, and SkillsMP links.",
+        },
+        txSignature: {
+          type: "string",
+          description:
+            "Solana transaction signature for paid scan. If omitted, uses free tier.",
+        },
+        paymentType: {
+          type: "string",
+          enum: ["sol", "vigil"],
+          description:
+            "Token used for payment: 'sol' or 'vigil'. Required when txSignature is provided.",
         },
       },
       required: ["skillUrl"],
@@ -72,16 +83,58 @@ const TOOLS = [
 ];
 
 async function handleScan(
-  skillUrl: string
+  skillUrl: string,
+  txSignature?: string,
+  paymentType?: string
 ): Promise<{ content: { type: string; text: string }[] }> {
   try {
-    const response = await fetch(`${VIGIL_API_URL}/api/scan`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ skillUrl }),
-    });
+    let response: Response;
+
+    if (txSignature) {
+      // Paid scan — hit /api/v1/scan with payment details
+      response = await fetch(`${VIGIL_API_URL}/api/v1/scan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skillUrl, txSignature, paymentType: paymentType || "sol" }),
+      });
+    } else {
+      // Free scan — hit /api/scan
+      response = await fetch(`${VIGIL_API_URL}/api/scan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skillUrl }),
+      });
+    }
 
     const data = await response.json();
+
+    // Handle 402 Payment Required — return structured payment info
+    if (response.status === 402) {
+      const p = data.payment;
+      const lines = [
+        `## Payment Required`,
+        ``,
+        `A paid scan requires SOL or $VIGIL payment on Solana.`,
+        ``,
+        `**Treasury wallet:** ${p?.treasury ?? "not configured"}`,
+        `**SOL price:** ${p?.priceSol ?? "N/A"} SOL`,
+        `**$VIGIL price:** ${p?.priceVigil ?? "N/A"} VIGIL`,
+        `**Token mint:** ${p?.mint ?? "not configured"}`,
+        `**Network:** ${p?.network ?? "solana"}`,
+        ``,
+        `Send payment to the treasury wallet, then call vigil_scan again with the txSignature and paymentType.`,
+      ];
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    }
+
+    // Handle 409 Conflict — duplicate transaction
+    if (response.status === 409) {
+      return {
+        content: [
+          { type: "text", text: `Error: Transaction already used. Each scan requires a unique payment transaction.` },
+        ],
+      };
+    }
 
     if (!response.ok) {
       return {
@@ -91,16 +144,25 @@ async function handleScan(
       };
     }
 
+    const score = data.score as number;
+    const safe = data.safe ?? score >= 70;
+
     const failed = (data.findings || []).filter(
       (f: { passed: boolean }) => !f.passed
     );
     const lines = [
       `## Vigil Security Report`,
       `**Skill:** ${data.skillName}`,
-      `**Score:** ${data.score}/100`,
-      `**Verdict:** ${data.score >= 70 ? "SAFE" : data.score >= 40 ? "CAUTION" : "DANGER"}`,
+      `**Score:** ${score}/100`,
+      `**Verdict:** ${score >= 70 ? "SAFE" : score >= 40 ? "CAUTION" : "DANGER"}`,
+      `**Safe to install:** ${safe ? "YES" : "NO"} (threshold: ${data.threshold ?? 70})`,
       ``,
     ];
+
+    if (txSignature) {
+      lines.push(`**Tier:** Paid (Sonnet deep review)`);
+      lines.push(``);
+    }
 
     if (failed.length > 0) {
       lines.push(`### Issues Found (${failed.length})`);
@@ -148,11 +210,14 @@ async function handleScore(
       };
     }
 
+    const score = data.score as number;
+    const safe = data.safe ?? score >= 70;
+
     return {
       content: [
         {
           type: "text",
-          text: `**${data.skillName}** — Score: ${data.score}/100 (scanned ${new Date(data.scannedAt).toLocaleDateString()})`,
+          text: `**${data.skillName}** — Score: ${score}/100 | **Safe to install:** ${safe ? "YES" : "NO"} (threshold: ${data.threshold ?? 70}) | Scanned ${new Date(data.scannedAt).toLocaleDateString()}`,
         },
       ],
     };
@@ -201,7 +266,7 @@ function handleRequest(req: MCPRequest): MCPResponse | Promise<MCPResponse> {
         ?.arguments;
 
       if (toolName === "vigil_scan") {
-        return handleScan(args.skillUrl).then((result) => ({
+        return handleScan(args.skillUrl, args.txSignature, args.paymentType).then((result) => ({
           jsonrpc: "2.0" as const,
           id: req.id,
           result,
