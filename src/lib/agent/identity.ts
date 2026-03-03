@@ -1,28 +1,29 @@
 import { ERC8004Client, ViemAdapter } from "erc-8004-js";
 import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { baseSepolia } from "viem/chains";
+import { base } from "viem/chains";
 
 // Vigil's on-chain agent identity configuration
 export const VIGIL_AGENT_METADATA = {
   type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
   name: "Vigil Protocol",
-  description: "Decentralized skill verification network for AI agent skills",
+  description: "Decentralized skill verification network for AI agent skills. Scans agent skills for security vulnerabilities before installation.",
   services: [
     { name: "MCP", endpoint: "https://vigil-protocol.vercel.app/mcp" },
     { name: "web", endpoint: "https://vigil-protocol.vercel.app/api/v1" },
+    { name: "scan", endpoint: "https://vigil-protocol.vercel.app/api/scan" },
   ],
   x402Support: true,
   active: true,
   supportedTrust: ["reputation"],
 };
 
-// ERC-8004 contract addresses on Base Sepolia — set via env
+// ERC-8004 contract addresses on Base Mainnet
 const ERC8004_ADDRESSES = {
-  identityRegistry: process.env.ERC8004_IDENTITY_REGISTRY || "0x0000000000000000000000000000000000000000",
-  reputationRegistry: process.env.ERC8004_REPUTATION_REGISTRY || "0x0000000000000000000000000000000000000000",
-  validationRegistry: process.env.ERC8004_VALIDATION_REGISTRY || "0x0000000000000000000000000000000000000000",
-  chainId: 84532,
+  identityRegistry: process.env.ERC8004_IDENTITY_REGISTRY || "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+  reputationRegistry: process.env.ERC8004_REPUTATION_REGISTRY || "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+  validationRegistry: "0x0000000000000000000000000000000000000000",
+  chainId: 8453,
 };
 
 function getVigilWallet() {
@@ -37,14 +38,14 @@ export function getERC8004Client(): ERC8004Client {
   const account = getVigilWallet();
 
   const publicClient = createPublicClient({
-    chain: baseSepolia,
-    transport: http(process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org"),
+    chain: base,
+    transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org"),
   });
 
   const walletClient = createWalletClient({
     account,
-    chain: baseSepolia,
-    transport: http(process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org"),
+    chain: base,
+    transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org"),
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

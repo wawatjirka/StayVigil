@@ -5,8 +5,8 @@ export const BASE_SEPOLIA = "eip155:84532";
 // Base mainnet
 export const BASE_MAINNET = "eip155:8453";
 
-// Use Base Sepolia for now (testnet)
-export const NETWORK = BASE_SEPOLIA;
+// Use Base mainnet
+export const NETWORK = BASE_MAINNET;
 
 // Price per scan in USDC
 export const SCAN_PRICE = "$0.02";
