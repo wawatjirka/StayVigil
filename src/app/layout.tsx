@@ -16,6 +16,20 @@ export const metadata: Metadata = {
   title: "Vigil Protocol — AI Skill Verification",
   description:
     "Scan AI agent skills for vulnerabilities, prompt injection, and malicious patterns before installing them.",
+  metadataBase: new URL("https://vigil-protocol.vercel.app"),
+  openGraph: {
+    title: "Vigil Protocol — AI Skill Verification",
+    description:
+      "Scan AI agent skills for vulnerabilities, prompt injection, and malicious patterns before installing them.",
+    siteName: "Vigil Protocol",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vigil Protocol — AI Skill Verification",
+    description:
+      "Scan AI agent skills for vulnerabilities, prompt injection, and malicious patterns before installing them.",
+  },
 };
 
 export default function RootLayout({

@@ -75,3 +75,9 @@ body {
       linear-gradient(to bottom, rgb(161 161 170 / 0.04) 1px, transparent 1px);
   }
 }
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

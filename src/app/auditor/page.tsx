@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ShieldLogo } from "@/components/ShieldLogo";
 
 interface AuditorData {
   wallet_address: string;
@@ -83,9 +84,12 @@ export default function AuditorPage() {
       <Header />
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-12 w-full">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
-          Become an Auditor
-        </h1>
+        <div className="flex items-center gap-3 mb-2">
+          <ShieldLogo size={28} />
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+            Become an Auditor
+          </h1>
+        </div>
         <p className="text-zinc-500 mb-8">
           Stake $VIGIL tokens, verify AI skills, and earn fees for every scan.
         </p>
@@ -139,7 +143,7 @@ export default function AuditorPage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-500 text-white font-medium transition-colors cursor-pointer disabled:cursor-not-allowed"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:from-zinc-500 disabled:to-zinc-500 text-white font-medium transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 cursor-pointer disabled:cursor-not-allowed"
             >
               {loading ? "Registering..." : "Register & Stake"}
             </button>

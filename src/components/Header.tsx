@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ShieldLogo } from "./ShieldLogo";
 
 const NAV_ITEMS = [
   { href: "/", label: "Scan" },
@@ -14,13 +15,17 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-lg">
-      <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-sm group-hover:shadow-blue-500/25 transition-shadow">
-            <span className="text-white font-bold text-sm">V</span>
-          </div>
+          <ShieldLogo
+            size={28}
+            className="drop-shadow-sm group-hover:drop-shadow-md transition-all duration-200"
+          />
           <span className="font-bold text-lg text-zinc-900 dark:text-zinc-100">
             Vigil
+          </span>
+          <span className="font-light text-lg text-zinc-400">
+            Protocol
           </span>
         </Link>
         <nav className="flex items-center gap-1">

@@ -1,14 +1,18 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ShieldLogo } from "@/components/ShieldLogo";
 
 export default function DocsPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
       <Header />
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
-          API Documentation
-        </h1>
+        <div className="flex items-center gap-3 mb-2">
+          <ShieldLogo size={28} />
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+            API Documentation
+          </h1>
+        </div>
         <p className="text-zinc-500 dark:text-zinc-400 mb-10">
           Integrate Vigil into your agent pipeline. Scan skills programmatically before installing them.
         </p>
