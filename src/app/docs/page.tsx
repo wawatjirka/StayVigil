@@ -136,32 +136,6 @@ curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
           </p>
         </section>
 
-        {/* On-chain */}
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-            On-Chain (Base Mainnet)
-          </h2>
-          <div className="space-y-3">
-            {[
-              { label: "VigilToken", address: "0xb056f310664357DE82e804456eD50C2F064927F6" },
-              { label: "VigilStaking", address: "0xbD2CDf58502e03175f8D36351A91fB4961248C0A" },
-              { label: "VigilChallenge", address: "0x799ed3EB886B23823994965315c29AF371CC54ef" },
-              { label: "BountyVault", address: "0x4FAa83a4bD2a796b65aF5071375d591C83e60b85" },
-            ].map((c) => (
-              <div key={c.label} className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{c.label}</span>
-                <a
-                  href={`https://basescan.org/address/${c.address}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-mono text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  {c.address.slice(0, 6)}...{c.address.slice(-4)}
-                </a>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
       <Footer />
     </div>
