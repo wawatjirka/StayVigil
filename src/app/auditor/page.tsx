@@ -39,6 +39,11 @@ export default function AuditorPage() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [submitScore, setSubmitScore] = useState("");
+  const [submitReport, setSubmitReport] = useState("");
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +80,42 @@ export default function AuditorPage() {
       if (res.ok) setDashboard(data);
     } catch {
       // Ignore — auditor may not exist yet
+    }
+  };
+
+  const handleSubmitAudit = async (assignmentId: string) => {
+    setSubmitLoading(true);
+    setSubmitMessage(null);
+
+    try {
+      const res = await fetch("/api/audit/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assignmentId,
+          walletAddress: wallet,
+          score: Number(submitScore),
+          report: submitReport,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setSubmitMessage(
+        data.consensus
+          ? `Submitted! Consensus resolved: score ${data.consensus.finalScore}, agreement ${data.consensus.agreement}`
+          : "Audit submitted — awaiting other auditors."
+      );
+      setSubmittingId(null);
+      setSubmitScore("");
+      setSubmitReport("");
+      loadDashboard();
+    } catch (err) {
+      setSubmitMessage(
+        err instanceof Error ? err.message : "Submission failed"
+      );
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -195,29 +236,88 @@ export default function AuditorPage() {
                 </h3>
                 <div className="space-y-3">
                   {dashboard.recentAssignments.map((a) => (
-                    <div
-                      key={a.id}
-                      className="flex items-center justify-between p-3 bg-black/40 border border-primary/20"
-                    >
-                      <div>
-                        <p className="text-sm font-mono text-primary/80 truncate max-w-md">
-                          {a.skill_url}
-                        </p>
-                        <p className="text-xs text-muted-foreground font-mono">
-                          {new Date(a.assigned_at).toLocaleDateString()}
-                        </p>
+                    <div key={a.id} className="border border-primary/20">
+                      <div className="flex items-center justify-between p-3 bg-black/40">
+                        <div>
+                          <p className="text-sm font-mono text-primary/80 truncate max-w-md">
+                            {a.skill_url}
+                          </p>
+                          <p className="text-xs text-muted-foreground font-mono">
+                            {new Date(a.assigned_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {(a.status === "assigned" || a.status === "in_progress") && (
+                            <button
+                              onClick={() => {
+                                setSubmittingId(submittingId === a.id ? null : a.id);
+                                setSubmitScore("");
+                                setSubmitReport("");
+                                setSubmitMessage(null);
+                              }}
+                              className="brutal-border bg-primary text-black font-display font-bold text-xs px-3 py-1 uppercase cursor-pointer hover:bg-primary/80 transition-colors"
+                            >
+                              {submittingId === a.id ? "[ CANCEL ]" : "[ SUBMIT AUDIT ]"}
+                            </button>
+                          )}
+                          <span
+                            className={`text-xs px-2 py-1 font-bold font-mono uppercase ${
+                              a.status === "completed"
+                                ? "bg-primary/20 text-primary border border-primary/40"
+                                : a.status === "disputed"
+                                  ? "bg-destructive/20 text-destructive border border-destructive/40"
+                                  : "bg-accent/20 text-accent border border-accent/40"
+                            }`}
+                          >
+                            {a.status}
+                          </span>
+                        </div>
                       </div>
-                      <span
-                        className={`text-xs px-2 py-1 font-bold font-mono uppercase ${
-                          a.status === "completed"
-                            ? "bg-primary/20 text-primary border border-primary/40"
-                            : a.status === "disputed"
-                              ? "bg-destructive/20 text-destructive border border-destructive/40"
-                              : "bg-accent/20 text-accent border border-accent/40"
-                        }`}
-                      >
-                        {a.status}
-                      </span>
+
+                      {submittingId === a.id && (
+                        <div className="p-4 border-t border-primary/20 bg-black/60 space-y-3">
+                          <div>
+                            <label className="block text-xs font-mono text-muted-foreground mb-1">
+                              Security Score (0-100)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={submitScore}
+                              onChange={(e) => setSubmitScore(e.target.value)}
+                              placeholder="75"
+                              className="w-full px-4 py-2 bg-black border-2 border-primary/50 text-primary font-mono text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition-all placeholder:text-primary/30"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-mono text-muted-foreground mb-1">
+                              Audit Report
+                            </label>
+                            <textarea
+                              value={submitReport}
+                              onChange={(e) => setSubmitReport(e.target.value)}
+                              placeholder="Describe your findings, vulnerabilities discovered, and reasoning for the score..."
+                              rows={4}
+                              className="w-full px-4 py-2 bg-black border-2 border-primary/50 text-primary font-mono text-sm focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(0,255,0,0.3)] transition-all placeholder:text-primary/30 resize-y"
+                              required
+                            />
+                          </div>
+                          <button
+                            onClick={() => handleSubmitAudit(a.id)}
+                            disabled={submitLoading || !submitScore || !submitReport}
+                            className="brutal-border bg-primary text-black font-display font-bold text-xs px-4 py-2 uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/80 transition-colors"
+                          >
+                            {submitLoading ? "SUBMITTING..." : "[ CONFIRM SUBMISSION ]"}
+                          </button>
+                          {submitMessage && (
+                            <p className="text-xs font-mono text-primary/80">
+                              {submitMessage}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

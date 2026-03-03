@@ -159,6 +159,170 @@ export function calculateConsensusScore(
 }
 
 /**
+ * Submit an audit result for an assignment.
+ * Verifies auditor ownership, validates input, updates assignment, then checks consensus.
+ */
+export async function submitAudit(
+  assignmentId: string,
+  walletAddress: string,
+  score: number,
+  report: string
+) {
+  if (score < 0 || score > 100) {
+    throw new Error("Score must be between 0 and 100");
+  }
+
+  const supabase = createServerClient();
+
+  // Verify auditor owns this assignment
+  const { data: auditor } = await supabase
+    .from("auditors")
+    .select("*")
+    .eq("wallet_address", walletAddress.toLowerCase())
+    .single();
+
+  if (!auditor) throw new Error("Auditor not found");
+
+  const { data: assignment } = await supabase
+    .from("audit_assignments")
+    .select("*")
+    .eq("id", assignmentId)
+    .eq("auditor_id", auditor.id)
+    .single();
+
+  if (!assignment) throw new Error("Assignment not found for this auditor");
+
+  if (assignment.status !== "assigned" && assignment.status !== "in_progress") {
+    throw new Error(`Cannot submit: assignment status is '${assignment.status}'`);
+  }
+
+  // Update assignment
+  const { data: updated, error: updateError } = await supabase
+    .from("audit_assignments")
+    .update({
+      status: "completed",
+      score,
+      report,
+      completed_at: new Date().toISOString(),
+    })
+    .eq("id", assignmentId)
+    .select()
+    .single();
+
+  if (updateError) throw updateError;
+
+  // Increment total_audits
+  await supabase
+    .from("auditors")
+    .update({ total_audits: (auditor.total_audits || 0) + 1 })
+    .eq("id", auditor.id);
+
+  // Check if consensus can be resolved
+  const consensusResult = await resolveConsensusIfReady(assignment.skill_url);
+
+  return { assignment: updated, consensus: consensusResult };
+}
+
+/**
+ * Check if all assignments for a skill are completed, and if so resolve consensus.
+ */
+export async function resolveConsensusIfReady(skillUrl: string) {
+  const supabase = createServerClient();
+
+  const { data: assignments } = await supabase
+    .from("audit_assignments")
+    .select("*")
+    .eq("skill_url", skillUrl);
+
+  if (!assignments || assignments.length === 0) return null;
+
+  // If any assignment is not completed, consensus isn't ready
+  const allCompleted = assignments.every((a: Record<string, unknown>) => a.status === "completed");
+  if (!allCompleted) return null;
+
+  // Fetch reputation scores for each auditor
+  const auditorIds = assignments.map((a: Record<string, unknown>) => a.auditor_id as string);
+  const { data: auditors } = await supabase
+    .from("auditors")
+    .select("id, reputation_score")
+    .in("id", auditorIds);
+
+  if (!auditors) return null;
+
+  const reputationMap = new Map(
+    auditors.map((a: Record<string, unknown>) => [a.id as string, a.reputation_score as number])
+  );
+
+  // Build input for consensus calculation
+  const audits = assignments.map((a: Record<string, unknown>) => ({
+    score: a.score as number,
+    reputationScore: reputationMap.get(a.auditor_id as string) || 50,
+  }));
+
+  const consensus = calculateConsensusScore(audits);
+
+  // Update the skill's score to the consensus score
+  await supabase
+    .from("skills")
+    .update({ score: consensus.score })
+    .eq("url", skillUrl);
+
+  // Update reputations based on how close each auditor was
+  await updateReputations(skillUrl, consensus.score);
+
+  return { finalScore: consensus.score, agreement: consensus.agreement };
+}
+
+/**
+ * Adjust auditor reputations based on deviation from consensus score.
+ */
+async function updateReputations(skillUrl: string, consensusScore: number) {
+  const supabase = createServerClient();
+
+  const { data: assignments } = await supabase
+    .from("audit_assignments")
+    .select("auditor_id, score")
+    .eq("skill_url", skillUrl)
+    .eq("status", "completed");
+
+  if (!assignments) return;
+
+  for (const assignment of assignments) {
+    const a = assignment as Record<string, unknown>;
+    const auditorId = a.auditor_id as string;
+    const auditorScore = a.score as number;
+    const deviation = Math.abs(auditorScore - consensusScore);
+
+    let delta: number;
+    if (deviation <= 10) {
+      delta = 3;
+    } else if (deviation <= 20) {
+      delta = 1;
+    } else if (deviation > 30) {
+      delta = -5;
+    } else {
+      delta = 0; // 20 < deviation <= 30: no change
+    }
+
+    const { data: auditor } = await supabase
+      .from("auditors")
+      .select("reputation_score")
+      .eq("id", auditorId)
+      .single();
+
+    if (!auditor) continue;
+
+    const currentRep = (auditor as Record<string, unknown>).reputation_score as number;
+    const newRep = Math.max(0, Math.min(100, currentRep + delta));
+
+    await supabase
+      .from("auditors")
+      .update({ reputation_score: newRep })
+      .eq("id", auditorId);
+  }
+}
+
+/**
  * Get dashboard data for an auditor.
  */
 export async function getAuditorDashboard(walletAddress: string) {

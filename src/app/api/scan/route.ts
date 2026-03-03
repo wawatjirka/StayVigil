@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { scanSkill } from "@/lib/scanner";
 import { createServerClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { assignAudit } from "@/lib/marketplace/auditor";
 import type { Finding } from "@/lib/database.types";
 
 /** Free tier: return only the top 3 most severe failed findings */
@@ -159,6 +160,11 @@ export async function POST(request: NextRequest) {
     // Delete old findings for this skill first
     await supabase.from("scan_results").delete().eq("skill_id", skill.id);
     await supabase.from("scan_results").insert(findingsToInsert);
+
+    // Fire-and-forget: assign auditors for this skill
+    assignAudit(result.skillUrl, result.score).catch((err) =>
+      console.error("Audit assignment failed:", err)
+    );
 
     return NextResponse.json(
       {

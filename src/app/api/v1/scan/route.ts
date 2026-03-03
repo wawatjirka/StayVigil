@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withX402 } from "@x402/next";
 import { scanSkill } from "@/lib/scanner";
 import { createServerClient } from "@/lib/supabase";
+import { assignAudit } from "@/lib/marketplace/auditor";
 import { getX402Server, SCAN_PRICE, NETWORK, PAY_TO } from "@/lib/x402";
 
 /**
@@ -98,6 +99,11 @@ const handler = async (request: NextRequest): Promise<NextResponse<unknown>> => 
       await supabase.from("scan_results").delete().eq("skill_id", skill.id);
       await supabase.from("scan_results").insert(findingsToInsert);
     }
+
+    // Fire-and-forget: assign auditors for this skill
+    assignAudit(result.skillUrl, result.score).catch((err) =>
+      console.error("Audit assignment failed:", err)
+    );
 
     return NextResponse.json({
       skillId: skill?.id,
