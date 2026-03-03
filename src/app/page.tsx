@@ -151,12 +151,6 @@ export default function Home() {
             >
               Become an Auditor
             </a>
-            <a
-              href="/tokenomics"
-              className="px-5 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 font-medium text-sm transition-colors"
-            >
-              View Tokenomics
-            </a>
           </div>
         </section>
       </main>
