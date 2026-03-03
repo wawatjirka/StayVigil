@@ -9,8 +9,8 @@ export const VIGIL_AGENT_METADATA = {
   name: "Vigil Protocol",
   description: "Decentralized skill verification network for AI agent skills",
   services: [
-    { name: "MCP", endpoint: "https://vigil.protocol/mcp" },
-    { name: "web", endpoint: "https://vigil.protocol/api/v1" },
+    { name: "MCP", endpoint: "https://vigil-protocol.vercel.app/mcp" },
+    { name: "web", endpoint: "https://vigil-protocol.vercel.app/api/v1" },
   ],
   x402Support: true,
   active: true,
@@ -48,7 +48,7 @@ export function getERC8004Client(): ERC8004Client {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const adapter = new ViemAdapter(publicClient as any, walletClient as any);
+  const adapter = new ViemAdapter(publicClient as any, walletClient as any, account as any);
 
   return new ERC8004Client({
     adapter,

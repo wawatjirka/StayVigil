@@ -21,7 +21,7 @@
 
 import { stdin, stdout } from "process";
 
-const VIGIL_API_URL = process.env.VIGIL_API_URL || "https://vigil.protocol";
+const VIGIL_API_URL = process.env.VIGIL_API_URL || "https://vigil-protocol.vercel.app";
 
 interface MCPRequest {
   jsonrpc: "2.0";
