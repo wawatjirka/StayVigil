@@ -1,82 +1,92 @@
-import { ERC8004Client, ViemAdapter } from "erc-8004-js";
-import { createWalletClient, createPublicClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { base } from "viem/chains";
+import { SolanaSDK, IPFSClient, buildRegistrationFileJson, ServiceType } from "8004-solana";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import bs58 from "bs58";
 
-// Vigil's on-chain agent identity configuration
+// Vigil's agent metadata for 8004-solana registration
 export const VIGIL_AGENT_METADATA = {
-  type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
   name: "Vigil Protocol",
   description: "Decentralized skill verification network for AI agent skills. Scans agent skills for security vulnerabilities before installation.",
+  image: "", // Set after IPFS upload
   services: [
-    { name: "MCP", endpoint: "https://vigil-protocol.vercel.app/mcp" },
-    { name: "web", endpoint: "https://vigil-protocol.vercel.app/api/v1" },
-    { name: "scan", endpoint: "https://vigil-protocol.vercel.app/api/scan" },
+    { type: ServiceType.MCP, value: "https://vigil-protocol.vercel.app/mcp" },
+    { type: ServiceType.A2A, value: "https://vigil-protocol.vercel.app/api/v1" },
   ],
-  x402Support: false,
-  active: true,
-  supportedTrust: ["reputation"],
 };
 
-// ERC-8004 contract addresses on Base Mainnet
-const ERC8004_ADDRESSES = {
-  identityRegistry: process.env.ERC8004_IDENTITY_REGISTRY || "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
-  reputationRegistry: process.env.ERC8004_REPUTATION_REGISTRY || "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
-  validationRegistry: "0x0000000000000000000000000000000000000000",
-  chainId: 8453,
-};
+let _sdkInstance: SolanaSDK | null = null;
 
-function getVigilWallet() {
-  const privateKey = process.env.VIGIL_AGENT_PRIVATE_KEY;
-  if (!privateKey) {
-    throw new Error("VIGIL_AGENT_PRIVATE_KEY not configured");
+/**
+ * Get or create a cached SolanaSDK instance for 8004-solana operations.
+ */
+export function getSolana8004SDK(): SolanaSDK {
+  if (_sdkInstance) return _sdkInstance;
+
+  const keypairSecret = process.env.VIGIL_AGENT_KEYPAIR;
+  if (!keypairSecret) {
+    throw new Error("VIGIL_AGENT_KEYPAIR not configured");
   }
-  return privateKeyToAccount(privateKey as `0x${string}`);
-}
 
-export function getERC8004Client(): ERC8004Client {
-  const account = getVigilWallet();
+  const signer = Keypair.fromSecretKey(bs58.decode(keypairSecret));
 
-  const publicClient = createPublicClient({
-    chain: base,
-    transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org"),
+  const ipfsClient = new IPFSClient({
+    pinataEnabled: !!process.env.PINATA_JWT,
+    pinataJwt: process.env.PINATA_JWT || "",
   });
 
-  const walletClient = createWalletClient({
-    account,
-    chain: base,
-    transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org"),
+  _sdkInstance = new SolanaSDK({
+    cluster: (process.env.SOLANA_8004_CLUSTER as "devnet" | "mainnet-beta") || "mainnet-beta",
+    signer,
+    ipfsClient,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const adapter = new ViemAdapter(publicClient as any, walletClient as any, account as any);
-
-  return new ERC8004Client({
-    adapter,
-    addresses: ERC8004_ADDRESSES,
-  });
+  return _sdkInstance;
 }
 
 /**
- * Register Vigil as an agent on the ERC-8004 Identity Registry.
- * Returns the agentId from the transaction receipt.
+ * Upload metadata to IPFS via Pinata, returning an ipfs:// URI.
+ */
+async function uploadMetadataToIPFS(metadata: Record<string, unknown>): Promise<string> {
+  const ipfsClient = new IPFSClient({
+    pinataEnabled: !!process.env.PINATA_JWT,
+    pinataJwt: process.env.PINATA_JWT || "",
+  });
+  return await ipfsClient.addJson(metadata);
+}
+
+/**
+ * Register Vigil as an agent on the 8004 Solana registry.
+ * Uploads metadata to IPFS, then mints a Metaplex Core NFT.
  */
 export async function registerVigilAgent() {
-  const client = getERC8004Client();
-  const tx = await client.identity.registerWithMetadata(
-    JSON.stringify(VIGIL_AGENT_METADATA)
-  );
-  return tx;
+  const sdk = getSolana8004SDK();
+
+  const registrationJson = buildRegistrationFileJson({
+    name: VIGIL_AGENT_METADATA.name,
+    description: VIGIL_AGENT_METADATA.description,
+    image: VIGIL_AGENT_METADATA.image,
+    services: VIGIL_AGENT_METADATA.services,
+  });
+
+  // Upload to IPFS separately (ipfsClient is private on SolanaSDK)
+  const metadataUri = await uploadMetadataToIPFS(registrationJson);
+
+  // Register on-chain — returns asset pubkey
+  const result = await sdk.registerAgent(metadataUri, { atomEnabled: true });
+  return result;
 }
 
 /**
- * Get Vigil's agent token URI by agentId.
+ * Get Vigil's agent identity by asset pubkey or numeric agent ID.
  */
-export async function getVigilIdentity(agentId: number) {
-  const client = getERC8004Client();
+export async function getVigilIdentity(agentId: string | number) {
+  const sdk = getSolana8004SDK();
   try {
-    const uri = await client.identity.getTokenURI(BigInt(agentId));
-    return { agentId, uri };
+    if (typeof agentId === "string" && agentId.length > 10) {
+      // Treat as base58 asset pubkey
+      return await sdk.loadAgent(new PublicKey(agentId));
+    }
+    // Treat as numeric sequence ID
+    return await sdk.getAgentByAgentId(Number(agentId));
   } catch {
     return null;
   }
@@ -85,15 +95,26 @@ export async function getVigilIdentity(agentId: number) {
 /**
  * Update Vigil's agent metadata URI.
  */
-export async function updateVigilMetadata(agentId: number, metadataUri: string) {
-  const client = getERC8004Client();
-  const tx = await client.identity.setAgentURI(BigInt(agentId), metadataUri);
-  return tx;
+export async function updateVigilMetadata(assetPubkey: string, metadataUri: string) {
+  const sdk = getSolana8004SDK();
+  return await sdk.setAgentUri(new PublicKey(assetPubkey), metadataUri);
 }
 
 /**
- * Get Vigil's on-chain agent address.
+ * Get Vigil's Solana pubkey (base58).
  */
-export function getVigilAddress() {
-  return getVigilWallet().address;
+export function getVigilAddress(): string {
+  const keypairSecret = process.env.VIGIL_AGENT_KEYPAIR;
+  if (!keypairSecret) {
+    throw new Error("VIGIL_AGENT_KEYPAIR not configured");
+  }
+  const signer = Keypair.fromSecretKey(bs58.decode(keypairSecret));
+  return signer.publicKey.toBase58();
+}
+
+/**
+ * Get the agent NFT asset pubkey from env.
+ */
+export function getVigilAssetPubkey(): string | null {
+  return process.env.VIGIL_AGENT_ASSET_PUBKEY || null;
 }

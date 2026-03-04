@@ -1,0 +1,100 @@
+{
+  "version": "0.1.0",
+  "name": "vigil_staking",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        { "name": "config", "isMut": true, "isSigner": false },
+        { "name": "vigilTokenMint", "isMut": false, "isSigner": false },
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "stake",
+      "accounts": [
+        { "name": "config", "isMut": true, "isSigner": false },
+        { "name": "stakeInfo", "isMut": true, "isSigner": false },
+        { "name": "auditor", "isMut": true, "isSigner": true },
+        { "name": "auditorTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "vaultTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
+      "name": "requestUnstake",
+      "accounts": [
+        { "name": "stakeInfo", "isMut": true, "isSigner": false },
+        { "name": "auditor", "isMut": false, "isSigner": true }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
+      "name": "unstake",
+      "accounts": [
+        { "name": "config", "isMut": true, "isSigner": false },
+        { "name": "stakeInfo", "isMut": true, "isSigner": false },
+        { "name": "auditor", "isMut": true, "isSigner": true },
+        { "name": "auditorTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "vaultTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "vaultAuthority", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "slash",
+      "accounts": [
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "stakeInfo", "isMut": true, "isSigner": false },
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "vaultTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "challengerTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "bountyTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "vaultAuthority", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "StakingConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "vigilTokenMint", "type": "publicKey" },
+          { "name": "challengeProgram", "type": "publicKey" },
+          { "name": "bountyVault", "type": "publicKey" },
+          { "name": "totalStakers", "type": "u64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "StakeInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "auditor", "type": "publicKey" },
+          { "name": "amount", "type": "u64" },
+          { "name": "unstakeRequestTime", "type": "i64" },
+          { "name": "unstakeRequestAmount", "type": "u64" },
+          { "name": "isRegistered", "type": "bool" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "ZeroAmount", "msg": "Amount must be greater than zero" },
+    { "code": 6001, "name": "InsufficientStake", "msg": "Insufficient staked amount" },
+    { "code": 6002, "name": "NoUnstakeRequest", "msg": "No pending unstake request" },
+    { "code": 6003, "name": "CooldownNotElapsed", "msg": "Unstake cooldown period has not elapsed (7 days)" }
+  ]
+}

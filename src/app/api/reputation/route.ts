@@ -7,18 +7,18 @@ import { getVigilIdentity } from "@/lib/agent/identity";
  */
 export async function GET(request: NextRequest) {
   try {
-    const agentId = Number(request.nextUrl.searchParams.get("agentId") || "0");
+    const agentId = request.nextUrl.searchParams.get("agentId") || "";
 
     if (!agentId) {
       return NextResponse.json(
-        { error: "Provide agentId query parameter" },
+        { error: "Provide agentId query parameter (asset pubkey or numeric ID)" },
         { status: 400 }
       );
     }
 
-    if (!process.env.VIGIL_AGENT_PRIVATE_KEY) {
+    if (!process.env.VIGIL_AGENT_KEYPAIR) {
       return NextResponse.json({
-        message: "Agent identity not configured. Set VIGIL_AGENT_PRIVATE_KEY and ERC8004 contract addresses.",
+        message: "Agent identity not configured. Set VIGIL_AGENT_KEYPAIR and SOLANA_8004_CLUSTER.",
         identity: null,
         reputation: null,
       });
@@ -33,8 +33,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       identity,
       reputation,
-      feedbackCount: Array.isArray(feedback) ? feedback.length : 0,
-      recentFeedback: Array.isArray(feedback) ? feedback.slice(-10) : [],
+      feedbackCount: feedback && typeof feedback === "object" && "totalFeedbacks" in feedback
+        ? feedback.totalFeedbacks
+        : 0,
+      averageScore: feedback && typeof feedback === "object" && "averageScore" in feedback
+        ? feedback.averageScore
+        : null,
     });
   } catch (error) {
     console.error("Reputation fetch error:", error);

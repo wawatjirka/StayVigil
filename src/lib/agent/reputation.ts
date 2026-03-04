@@ -1,4 +1,5 @@
-import { getERC8004Client } from "./identity";
+import { getSolana8004SDK, getVigilAssetPubkey } from "./identity";
+import { PublicKey } from "@solana/web3.js";
 
 export interface FeedbackData {
   accuracy: number;   // 0-100
@@ -11,30 +12,47 @@ export interface FeedbackData {
  * Submit feedback for an agent's scan quality.
  * Score is a composite of accuracy, responseTime, uptime (averaged to 0-100).
  */
-export async function submitFeedback(agentId: number, feedback: FeedbackData) {
-  const client = getERC8004Client();
+export async function submitFeedback(agentId: string, feedback: FeedbackData) {
+  const sdk = getSolana8004SDK();
+
   const score = Math.round(
     (feedback.accuracy + feedback.responseTime + feedback.uptime) / 3
   );
 
-  const tx = await client.reputation.giveFeedback({
-    agentId: BigInt(agentId),
-    score,
+  // agentId is the asset pubkey (base58)
+  const assetPubkey = typeof agentId === "string" && agentId.length > 10
+    ? agentId
+    : getVigilAssetPubkey();
+
+  if (!assetPubkey) {
+    throw new Error("No asset pubkey available for feedback");
+  }
+
+  const result = await sdk.giveFeedback(new PublicKey(assetPubkey), {
+    value: score,
     tag1: "skill-scan",
     tag2: "",
-    endpoint: "",
-    feedbackURI: feedback.comment || "",
+    feedbackUri: feedback.comment || "",
   });
-  return tx;
+
+  return result;
 }
 
 /**
- * Get reputation summary for an agent by ID.
+ * Get reputation summary for an agent by asset pubkey.
+ * Returns { averageScore, totalFeedbacks }.
  */
-export async function getReputationSummary(agentId: number) {
-  const client = getERC8004Client();
+export async function getReputationSummary(agentId: string) {
+  const sdk = getSolana8004SDK();
+
+  const assetPubkey = typeof agentId === "string" && agentId.length > 10
+    ? agentId
+    : getVigilAssetPubkey();
+
+  if (!assetPubkey) return null;
+
   try {
-    const summary = await client.reputation.getSummary(BigInt(agentId));
+    const summary = await sdk.getSummary(new PublicKey(assetPubkey));
     return summary;
   } catch {
     return null;
@@ -43,13 +61,15 @@ export async function getReputationSummary(agentId: number) {
 
 /**
  * Get all feedback entries for an agent.
+ * Note: Per-entry feedback requires an indexer; returns summary data.
  */
-export async function getAllFeedback(agentId: number) {
-  const client = getERC8004Client();
-  try {
-    const feedback = await client.reputation.readAllFeedback(BigInt(agentId));
-    return feedback;
-  } catch {
-    return [];
-  }
+export async function getAllFeedback(agentId: string) {
+  const summary = await getReputationSummary(agentId);
+  if (!summary) return [];
+
+  // 8004-solana returns aggregate data, not individual entries
+  return {
+    totalFeedbacks: summary.totalFeedbacks,
+    averageScore: summary.averageScore,
+  };
 }

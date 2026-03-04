@@ -5,6 +5,7 @@ import {
   verifyWalletSignature,
   getVigilTokenBalance,
 } from "@/lib/solana-verify";
+import { getOnChainStake, isStakingConfigured } from "@/lib/solana-programs";
 
 const SIGNATURE_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -64,17 +65,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check on-chain $VIGIL token balance for tier
-    const balance = await getVigilTokenBalance(walletAddress);
-    // null = demo mode (mint not set), default to bronze minimum
-    const stakeAmount = balance ?? 1000;
+    // Check on-chain stake first (Anchor program), fallback to token balance
+    let stakeAmount = 1000; // Default bronze minimum (demo mode)
+
+    if (isStakingConfigured()) {
+      const stakeData = await getOnChainStake(walletAddress);
+      if (stakeData && stakeData.amount > 0) {
+        // Trust on-chain stake (amount is in 6-decimal base units, convert to whole tokens)
+        stakeAmount = stakeData.amount / 1e6;
+      } else {
+        // No on-chain stake — fallback to token balance check
+        const balance = await getVigilTokenBalance(walletAddress);
+        stakeAmount = balance ?? 1000;
+      }
+    } else {
+      // Staking program not deployed — use token balance (demo mode)
+      const balance = await getVigilTokenBalance(walletAddress);
+      stakeAmount = balance ?? 1000;
+    }
 
     const auditor = await registerAuditor(walletAddress, stakeAmount);
 
     return NextResponse.json({
       message: "Auditor registered successfully",
       auditor,
-      demoMode: balance === null,
+      demoMode: !isStakingConfigured(),
     });
   } catch (error) {
     console.error("Auditor registration error:", error);

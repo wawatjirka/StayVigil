@@ -1,4 +1,5 @@
 import { createServerClient } from "../supabase";
+import { getOnChainStake, isStakingConfigured } from "../solana-programs";
 
 export interface Auditor {
   id: string;
@@ -38,11 +39,22 @@ function getTier(stakeAmount: number): Auditor["tier"] {
 
 /**
  * Register a new auditor after they've staked on-chain.
+ * Optionally verifies on-chain stake if staking program is configured.
  */
 export async function registerAuditor(
   walletAddress: string,
   stakeAmount: number
 ) {
+  // If staking program is live, verify on-chain stake
+  let verifiedAmount = stakeAmount;
+  if (isStakingConfigured()) {
+    const onChainStake = await getOnChainStake(walletAddress);
+    if (onChainStake && onChainStake.isRegistered) {
+      // On-chain amount is in 6-decimal base units, convert to whole tokens
+      verifiedAmount = onChainStake.amount / 1e6;
+    }
+  }
+
   const supabase = createServerClient();
 
   const { data, error } = await supabase
@@ -50,8 +62,8 @@ export async function registerAuditor(
     .upsert(
       {
         wallet_address: walletAddress,
-        stake_amount: stakeAmount,
-        tier: getTier(stakeAmount),
+        stake_amount: verifiedAmount,
+        tier: getTier(verifiedAmount),
         reputation_score: 50, // Start at neutral
         total_audits: 0,
         active: true,

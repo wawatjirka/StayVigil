@@ -37,12 +37,15 @@ yarn-error.log*
 # vercel
 .vercel
 
-# hardhat
-contracts/node_modules
-contracts/cache
-contracts/artifacts
-contracts/typechain-types
-contracts/deployments-*.json
+# archived contracts (Base/EVM)
+contracts-archive/
+
+# reference designs
+Vigil-Degenerate-1/
+
+# anchor
+programs/target/
+programs/node_modules/
 
 # typescript
 *.tsbuildinfo
