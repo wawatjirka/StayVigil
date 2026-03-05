@@ -4,7 +4,7 @@ import bs58 from "bs58";
 
 // Vigil's agent metadata for 8004-solana registration
 export const VIGIL_AGENT_METADATA = {
-  name: "Vigil Protocol",
+  name: "StayVigil",
   description: "Decentralized skill verification network for AI agent skills. Scans agent skills for security vulnerabilities before installation.",
   image: "", // Set after IPFS upload
   services: [

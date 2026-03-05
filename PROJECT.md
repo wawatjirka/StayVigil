@@ -1,4 +1,4 @@
-# Vigil Protocol
+# StayVigil
 
 Decentralized AI skill verification network. Scans agent skills for vulnerabilities before installation.
 

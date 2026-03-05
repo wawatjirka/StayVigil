@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Vigil Protocol MCP Server
+ * StayVigil MCP Server
  *
  * Provides a `vigil_scan` tool that AI agents (Claude Code, Codex, etc.)
  * can call to verify skills before installing them.
@@ -341,4 +341,4 @@ stdin.on("data", async (chunk: string) => {
 });
 
 // Signal ready
-process.stderr.write("Vigil Protocol MCP server started\n");
+process.stderr.write("StayVigil MCP server started\n");

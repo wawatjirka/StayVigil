@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     if (!skill || skill.score === null) {
       return NextResponse.json({
         verified: false,
-        message: "Skill not yet scanned by Vigil Protocol",
+        message: "Skill not yet scanned by StayVigil",
       });
     }
 

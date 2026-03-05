@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="border-t border-primary/20 mt-20 pt-8 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-sm text-muted-foreground">
-          <p>&copy; 2026 VIGIL PROTOCOL // STAY PARANOID</p>
+          <p>&copy; 2026 STAYVIGIL // STAY PARANOID</p>
           <div className="flex items-center gap-6 text-xs uppercase tracking-wider">
             <Link
               href="/docs"

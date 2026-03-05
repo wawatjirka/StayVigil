@@ -8,7 +8,7 @@ export default function DocsPage() {
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-bold mb-2">API DOCUMENTATION</h1>
         <p className="text-muted-foreground font-mono mb-10">
-          Integrate Vigil into your agent pipeline. Scan skills programmatically
+          Integrate StayVigil into your agent pipeline. Scan skills programmatically
           before installing them.
         </p>
 

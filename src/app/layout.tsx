@@ -12,20 +12,20 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VIGIL PROTOCOL — AI Skill Verification",
+  title: "STAYVIGIL — AI Skill Verification",
   description:
     "Scan AI agent skills for vulnerabilities, prompt injection, and malicious patterns before they nuke your wallet.",
   metadataBase: new URL("https://vigil-protocol.vercel.app"),
   openGraph: {
-    title: "VIGIL PROTOCOL — AI Skill Verification",
+    title: "STAYVIGIL — AI Skill Verification",
     description:
       "Scan AI agent skills for vulnerabilities, prompt injection, and malicious patterns before installing them.",
-    siteName: "Vigil Protocol",
+    siteName: "StayVigil",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VIGIL PROTOCOL — AI Skill Verification",
+    title: "STAYVIGIL — AI Skill Verification",
     description:
       "Scan AI agent skills for vulnerabilities, prompt injection, and malicious patterns before installing them.",
   },

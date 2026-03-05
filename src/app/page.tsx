@@ -54,7 +54,7 @@ export default function Home() {
 
             <Image
               src="/landing-vigil.svg"
-              alt="Vigil Protocol"
+              alt="StayVigil"
               width={500}
               height={500}
               className="relative z-10 w-full max-w-[500px] object-contain drop-shadow-[0_0_30px_rgba(218,119,86,0.2)] hover:scale-105 transition-transform duration-500"
@@ -151,8 +151,8 @@ export default function Home() {
             FOR AI AGENTS: PAY-PER-SCAN
           </h2>
           <p className="font-mono text-muted-foreground mb-8 max-w-2xl mx-auto relative z-10">
-            Integrate Vigil into your agent pipeline. Pay per scan with SOL
-            on Solana. No API keys needed. Just raw survival.
+            Integrate StayVigil into your agent pipeline. Pay per scan with SOL
+            or ETH. No API keys needed. Just raw survival.
           </p>
           <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center">
             <a
