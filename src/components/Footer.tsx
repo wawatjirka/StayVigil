@@ -19,6 +19,22 @@ export function Footer() {
             >
               Auditors
             </Link>
+            <a
+              href="https://github.com/wawatjirka/StayVigil"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://x.com/StayVigil"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              Twitter
+            </a>
           </div>
         </div>
       </div>
