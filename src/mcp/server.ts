@@ -53,13 +53,19 @@ const TOOLS = [
         txSignature: {
           type: "string",
           description:
-            "Solana transaction signature for paid scan. If omitted, uses free tier.",
+            "Transaction signature/hash for paid scan. Solana base58 signature or Base 0x hash. If omitted, uses free tier.",
         },
         paymentType: {
           type: "string",
           enum: ["sol", "token"],
           description:
-            "Token used for payment: 'sol' or 'token'. Required when txSignature is provided.",
+            "Token used for payment: 'sol' (or 'eth' on Base) or 'token'. Required when txSignature is provided.",
+        },
+        chain: {
+          type: "string",
+          enum: ["solana", "base"],
+          description:
+            "Blockchain for payment. Defaults to 'solana'. Use 'base' for Base L2 payments.",
         },
       },
       required: ["skillUrl"],
@@ -85,7 +91,8 @@ const TOOLS = [
 async function handleScan(
   skillUrl: string,
   txSignature?: string,
-  paymentType?: string
+  paymentType?: string,
+  chain?: string
 ): Promise<{ content: { type: string; text: string }[] }> {
   try {
     let response: Response;
@@ -95,7 +102,7 @@ async function handleScan(
       response = await fetch(`${VIGIL_API_URL}/api/v1/scan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ skillUrl, txSignature, paymentType: paymentType || "sol" }),
+        body: JSON.stringify({ skillUrl, txSignature, paymentType: paymentType || "sol", chain }),
       });
     } else {
       // Free scan — hit /api/scan
@@ -111,18 +118,21 @@ async function handleScan(
     // Handle 402 Payment Required — return structured payment info
     if (response.status === 402) {
       const p = data.payment;
+      const network = p?.network ?? "solana";
+      const currency = p?.nativeCurrency ?? "SOL";
+      const nativePrice = p?.priceNative ?? p?.priceSol ?? p?.priceEth ?? "N/A";
       const lines = [
         `## Payment Required`,
         ``,
-        `A paid scan requires SOL or SPL token payment on Solana.`,
+        `A paid scan requires ${currency} or token payment on ${network}.`,
         ``,
         `**Treasury wallet:** ${p?.treasury ?? "not configured"}`,
-        `**SOL price:** ${p?.priceSol ?? "N/A"} SOL`,
+        `**${currency} price:** ${nativePrice} ${currency}`,
         `**Token price:** ${p?.priceVigil ?? "N/A"} tokens`,
         `**Token mint:** ${p?.mint ?? "not configured"}`,
-        `**Network:** ${p?.network ?? "solana"}`,
+        `**Network:** ${network}`,
         ``,
-        `Send payment to the treasury wallet, then call vigil_scan again with the txSignature and paymentType.`,
+        `Send payment to the treasury wallet, then call vigil_scan again with the txSignature, paymentType, and chain="${network}".`,
       ];
       return { content: [{ type: "text", text: lines.join("\n") }] };
     }
@@ -266,7 +276,7 @@ function handleRequest(req: MCPRequest): MCPResponse | Promise<MCPResponse> {
         ?.arguments;
 
       if (toolName === "vigil_scan") {
-        return handleScan(args.skillUrl, args.txSignature, args.paymentType).then((result) => ({
+        return handleScan(args.skillUrl, args.txSignature, args.paymentType, args.chain).then((result) => ({
           jsonrpc: "2.0" as const,
           id: req.id,
           result,

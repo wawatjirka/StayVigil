@@ -2,22 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { scanSkill } from "@/lib/scanner";
 import { createServerClient } from "@/lib/supabase";
 import { assignAudit } from "@/lib/marketplace/auditor";
-import { verifySolPayment, verifyVigilPayment } from "@/lib/solana-verify";
-import {
-  getTreasuryWallet,
-  getTokenMint,
-  getScanPriceSol,
-  getScanPriceVigil,
-} from "@/lib/solana";
+import { getChainAdapter, isValidChainId } from "@/lib/chain";
 
 /**
  * Paid scan endpoint — full report with all findings.
- * Accepts SOL or SPL token payment on Solana.
+ * Accepts SOL or SPL token payment on Solana, or ETH/ERC20 on Base.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { skillUrl, txSignature, paymentType } = body;
+    const { skillUrl, txSignature, paymentType, chain: rawChain } = body;
 
     if (!skillUrl || typeof skillUrl !== "string") {
       return NextResponse.json(
@@ -35,19 +29,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate chain parameter (defaults to "solana")
+    const chain = rawChain || "solana";
+    if (!isValidChainId(chain)) {
+      return NextResponse.json(
+        { error: `Unsupported chain: ${chain}` },
+        { status: 400 }
+      );
+    }
+
+    const adapter = getChainAdapter(chain);
+
     // If no transaction signature, return 402 with payment details
     if (!txSignature) {
-      const treasury = getTreasuryWallet();
-      const mint = getTokenMint();
+      const payment = adapter.getPaymentInfo();
       return NextResponse.json(
         {
           error: "Payment required",
           payment: {
-            treasury: treasury?.toBase58() ?? null,
-            mint: mint?.toBase58() ?? null,
-            priceSol: getScanPriceSol(),
-            priceVigil: getScanPriceVigil(),
-            network: "solana",
+            treasury: payment.treasury || null,
+            mint: payment.tokenMint,
+            priceSol: chain === "solana" ? payment.nativePrice : undefined,
+            priceEth: chain === "base" ? payment.nativePrice : undefined,
+            priceNative: payment.nativePrice,
+            priceVigil: payment.tokenPrice,
+            network: payment.network,
+            nativeCurrency: payment.nativeCurrency,
             description:
               "Full security scan of an AI agent skill — includes all findings, severity breakdown, and recommendation.",
           },
@@ -57,11 +64,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify payment on-chain
-    const type = paymentType === "vigil" ? "vigil" : "sol";
+    const type = paymentType === "vigil" || paymentType === "token" ? "token" : "native";
     const verification =
-      type === "vigil"
-        ? await verifyVigilPayment(txSignature)
-        : await verifySolPayment(txSignature);
+      type === "token"
+        ? await adapter.verifyTokenPayment(txSignature)
+        : await adapter.verifyNativePayment(txSignature);
 
     if (!verification.verified) {
       return NextResponse.json(
@@ -87,10 +94,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Record the transaction signature
+    const paymentTypeDb = paymentType === "vigil" || paymentType === "token" ? "vigil" : "sol";
     await supabase.from("used_tx_signatures").insert({
       tx_signature: txSignature,
-      payment_type: type,
+      payment_type: paymentTypeDb,
       skill_url: skillUrl,
+      chain,
     });
 
     // Check for cached result (scanned in last 24h)

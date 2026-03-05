@@ -1,5 +1,5 @@
 import { createServerClient } from "../supabase";
-import { getOnChainStake, isStakingConfigured } from "../solana-programs";
+import { getChainAdapter, type ChainId } from "../chain";
 
 export interface Auditor {
   id: string;
@@ -43,15 +43,17 @@ function getTier(stakeAmount: number): Auditor["tier"] {
  */
 export async function registerAuditor(
   walletAddress: string,
-  stakeAmount: number
+  stakeAmount: number,
+  chain: ChainId = "solana"
 ) {
+  const adapter = getChainAdapter(chain);
+
   // If staking program is live, verify on-chain stake
   let verifiedAmount = stakeAmount;
-  if (isStakingConfigured()) {
-    const onChainStake = await getOnChainStake(walletAddress);
+  if (adapter.isStakingConfigured()) {
+    const onChainStake = await adapter.getStake(walletAddress);
     if (onChainStake && onChainStake.isRegistered) {
-      // On-chain amount is in 6-decimal base units, convert to whole tokens
-      verifiedAmount = onChainStake.amount / 1e6;
+      verifiedAmount = onChainStake.amount;
     }
   }
 
@@ -68,8 +70,9 @@ export async function registerAuditor(
         total_audits: 0,
         active: true,
         registered_at: new Date().toISOString(),
+        chain,
       },
-      { onConflict: "wallet_address" }
+      { onConflict: "wallet_address,chain" }
     )
     .select()
     .single();

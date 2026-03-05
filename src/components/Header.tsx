@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Eye, Activity, Cpu } from "lucide-react";
+import { Eye, Cpu } from "lucide-react";
+import { ChainSelector } from "./ChainSelector";
 
 const NAV_ITEMS = [
   { href: "/", label: "Scan" },
@@ -25,9 +26,7 @@ export function Header() {
       </div>
       <div className="flex gap-4 items-center font-mono text-sm">
         <div className="hidden md:flex gap-4 mr-4 border-r border-primary/30 pr-4">
-          <span className="text-muted-foreground flex items-center gap-2">
-            <Activity className="w-4 h-4" /> NET: SOLANA
-          </span>
+          <ChainSelector />
           <span className="text-muted-foreground flex items-center gap-2">
             <Cpu className="w-4 h-4" /> STATUS: ONLINE
           </span>

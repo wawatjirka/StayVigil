@@ -5,6 +5,27 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useChain } from "@/lib/chain/context";
+
+// Conditionally import wagmi hooks — only used when Base is selected
+let useAccount: () => { address?: string; isConnected: boolean };
+let useSignMessage: () => { signMessageAsync: (args: { message: string }) => Promise<string> };
+let ConnectButton: React.ComponentType;
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const wagmi = require("wagmi");
+  useAccount = wagmi.useAccount;
+  useSignMessage = wagmi.useSignMessage;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const rainbowkit = require("@rainbow-me/rainbowkit");
+  ConnectButton = rainbowkit.ConnectButton;
+} catch {
+  // wagmi not available — Base disabled
+  useAccount = () => ({ address: undefined, isConnected: false });
+  useSignMessage = () => ({ signMessageAsync: async () => "" });
+  ConnectButton = () => null;
+}
 
 interface AuditorData {
   wallet_address: string;
@@ -36,8 +57,21 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 export default function AuditorPage() {
-  const { publicKey, signMessage, connected } = useWallet();
-  const walletAddress = publicKey?.toBase58() ?? "";
+  const { chain, baseEnabled } = useChain();
+
+  // Solana wallet
+  const { publicKey, signMessage: solanaSignMessage, connected: solanaConnected } = useWallet();
+  const solanaAddress = publicKey?.toBase58() ?? "";
+
+  // Base wallet (only active when Base is enabled)
+  const baseAccount = baseEnabled ? useAccount() : { address: undefined, isConnected: false };
+  const baseSignMessage = baseEnabled ? useSignMessage() : { signMessageAsync: async () => "" };
+  const baseAddress = baseAccount.address ?? "";
+  const baseConnected = baseAccount.isConnected;
+
+  // Derive active wallet from selected chain
+  const walletAddress = chain === "base" ? baseAddress : solanaAddress;
+  const isConnected = chain === "base" ? baseConnected : solanaConnected;
 
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -63,28 +97,35 @@ export default function AuditorPage() {
 
   // Auto-load dashboard when wallet connects
   useEffect(() => {
-    if (connected && walletAddress) {
+    if (isConnected && walletAddress) {
       loadDashboard();
     } else {
       setDashboard(null);
     }
-  }, [connected, walletAddress, loadDashboard]);
+  }, [isConnected, walletAddress, loadDashboard]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!publicKey || !signMessage) return;
+    if (!walletAddress) return;
     setLoading(true);
     setMessage(null);
 
     try {
       const timestamp = Date.now();
       const msg = `Vigil Protocol auditor registration: ${walletAddress}:${timestamp}`;
-      const messageBytes = new TextEncoder().encode(msg);
-      const signatureBytes = await signMessage(messageBytes);
+      let signature: string;
 
-      // Encode signature as base58
-      const bs58 = (await import("bs58")).default;
-      const signature = bs58.encode(signatureBytes);
+      if (chain === "base") {
+        // EIP-191 signing via wagmi
+        signature = await baseSignMessage.signMessageAsync({ message: msg });
+      } else {
+        // Ed25519 signing via Solana wallet adapter
+        if (!solanaSignMessage) throw new Error("Wallet does not support signing");
+        const messageBytes = new TextEncoder().encode(msg);
+        const signatureBytes = await solanaSignMessage(messageBytes);
+        const bs58 = (await import("bs58")).default;
+        signature = bs58.encode(signatureBytes);
+      }
 
       const res = await fetch("/api/auditor/register", {
         method: "POST",
@@ -94,6 +135,7 @@ export default function AuditorPage() {
           signature,
           message: msg,
           timestamp,
+          chain,
         }),
       });
       const data = await res.json();
@@ -162,23 +204,36 @@ export default function AuditorPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-mono text-muted-foreground mb-2">
-                Connect Wallet
+                Connect Wallet {chain === "base" && baseEnabled ? "(Base)" : "(Solana)"}
               </label>
-              <WalletMultiButton
-                style={{
-                  backgroundColor: "transparent",
-                  border: "2px solid rgba(0, 255, 0, 0.5)",
-                  color: "rgb(0, 255, 0)",
-                  fontFamily: "monospace",
-                  fontSize: "0.875rem",
-                  height: "auto",
-                  padding: "0.75rem 1rem",
-                }}
-              />
-              {connected && walletAddress && (
-                <p className="text-xs text-primary/60 font-mono mt-2 truncate">
-                  {walletAddress}
-                </p>
+              {chain === "base" && baseEnabled ? (
+                <div>
+                  {ConnectButton && <ConnectButton />}
+                  {baseConnected && baseAddress && (
+                    <p className="text-xs text-primary/60 font-mono mt-2 truncate">
+                      {baseAddress}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <WalletMultiButton
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "2px solid rgba(0, 255, 0, 0.5)",
+                      color: "rgb(0, 255, 0)",
+                      fontFamily: "monospace",
+                      fontSize: "0.875rem",
+                      height: "auto",
+                      padding: "0.75rem 1rem",
+                    }}
+                  />
+                  {solanaConnected && solanaAddress && (
+                    <p className="text-xs text-primary/60 font-mono mt-2 truncate">
+                      {solanaAddress}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
             <div className="text-sm text-muted-foreground font-mono">
@@ -194,7 +249,7 @@ export default function AuditorPage() {
             </div>
             <button
               type="submit"
-              disabled={loading || !connected || !signMessage}
+              disabled={loading || !isConnected}
               className="brutal-border bg-primary text-black font-display font-bold text-sm px-6 py-3 uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/80 transition-colors"
             >
               {loading ? "SIGNING..." : "[ SIGN & REGISTER ]"}
