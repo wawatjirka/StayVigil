@@ -50,23 +50,23 @@ export default function Home() {
             {/* Background elements for mascot */}
             <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl mix-blend-screen animate-pulse" />
             <div className="absolute w-full h-full border border-primary/20 rounded-full animate-[spin_10s_linear_infinite] border-dashed" />
-            <div className="absolute w-3/4 h-3/4 border border-destructive/20 rounded-full animate-[spin_15s_linear_infinite_reverse] border-dotted" />
+            <div className="absolute w-3/4 h-3/4 border border-accent/20 rounded-full animate-[spin_15s_linear_infinite_reverse] border-dotted" />
 
             <Image
-              src="/mascot.png"
-              alt="Paranoid Security Guard"
+              src="/landing-vigil.svg"
+              alt="Vigil Protocol"
               width={500}
               height={500}
-              className="relative z-10 w-full max-w-[500px] object-contain drop-shadow-[0_0_30px_rgba(0,255,0,0.2)] hover:scale-105 transition-transform duration-500"
+              className="relative z-10 w-full max-w-[500px] object-contain drop-shadow-[0_0_30px_rgba(218,119,86,0.2)] hover:scale-105 transition-transform duration-500"
               priority
             />
 
             {/* Floating warning tags */}
             <div className="absolute top-10 right-10 bg-black/80 border border-destructive text-destructive font-mono text-xs px-2 py-1 rotate-12 backdrop-blur z-20">
-              ! REKT RISK
+              ! THREAT DETECTED
             </div>
-            <div className="absolute bottom-20 left-10 bg-black/80 border border-accent text-accent font-mono text-xs px-2 py-1 -rotate-6 backdrop-blur z-20">
-              SUSPICIOUS PAYLOAD
+            <div className="absolute bottom-20 left-10 bg-black/80 border border-primary text-primary font-mono text-xs px-2 py-1 -rotate-6 backdrop-blur z-20">
+              SCANNING...
             </div>
           </div>
         </div>

@@ -220,8 +220,8 @@ export default function AuditorPage() {
                   <WalletMultiButton
                     style={{
                       backgroundColor: "transparent",
-                      border: "2px solid rgba(0, 255, 0, 0.5)",
-                      color: "rgb(0, 255, 0)",
+                      border: "2px solid rgba(218, 119, 86, 0.5)",
+                      color: "rgb(218, 119, 86)",
                       fontFamily: "monospace",
                       fontSize: "0.875rem",
                       height: "auto",

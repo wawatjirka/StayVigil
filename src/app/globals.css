@@ -27,26 +27,26 @@
 }
 
 :root {
-  --background: 240 10% 4%;
-  --foreground: 120 100% 50%;
+  --background: 20 10% 7%;
+  --foreground: 30 20% 90%;
 
-  --card: 240 10% 6%;
-  --card-foreground: 120 100% 50%;
+  --card: 20 10% 10%;
+  --card-foreground: 30 20% 90%;
 
-  --primary: 120 100% 50%;
-  --primary-foreground: 240 10% 4%;
+  --primary: 16 70% 58%;
+  --primary-foreground: 20 10% 7%;
 
-  --muted-foreground: 120 40% 40%;
+  --muted-foreground: 20 10% 50%;
 
-  --accent: 60 100% 50%;
-  --accent-foreground: 240 10% 4%;
+  --accent: 28 80% 55%;
+  --accent-foreground: 20 10% 7%;
 
-  --destructive: 0 100% 50%;
+  --destructive: 0 70% 50%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 120 100% 30%;
-  --input: 120 100% 30%;
-  --ring: 120 100% 50%;
+  --border: 16 30% 25%;
+  --input: 16 30% 25%;
+  --ring: 16 70% 58%;
 }
 
 * {
@@ -58,12 +58,12 @@ body {
   color: hsl(var(--foreground));
   font-family: var(--font-sans), system-ui, monospace;
   background-image:
-    linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(218, 119, 86, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(218, 119, 86, 0.02) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
-/* CRT scanline overlay */
+/* Subtle noise overlay (replaces CRT scanlines) */
 body::before {
   content: "";
   display: block;
@@ -73,11 +73,11 @@ body::before {
   bottom: 0;
   right: 0;
   background:
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%);
   z-index: 50;
-  background-size: 100% 2px, 3px 100%;
+  background-size: 100% 3px;
   pointer-events: none;
+  opacity: 0.3;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -86,58 +86,58 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
 }
 
-/* Glitch text effect */
+/* Glitch text effect — warm tones */
 .glitch-text {
   position: relative;
   text-shadow:
-    0.05em 0 0 rgba(255,0,0,0.75),
-    -0.025em -0.05em 0 rgba(0,255,0,0.75),
-    0.025em 0.05em 0 rgba(0,0,255,0.75);
+    0.05em 0 0 rgba(218,119,86,0.75),
+    -0.025em -0.05em 0 rgba(255,160,100,0.5),
+    0.025em 0.05em 0 rgba(180,80,50,0.5);
   animation: glitch 500ms infinite;
 }
 
 @keyframes glitch {
   0% {
     text-shadow:
-      0.05em 0 0 rgba(255,0,0,0.75),
-      -0.05em -0.025em 0 rgba(0,255,0,0.75),
-      -0.025em 0.05em 0 rgba(0,0,255,0.75);
+      0.05em 0 0 rgba(218,119,86,0.75),
+      -0.05em -0.025em 0 rgba(255,160,100,0.5),
+      -0.025em 0.05em 0 rgba(180,80,50,0.5);
   }
   14% {
     text-shadow:
-      0.05em 0 0 rgba(255,0,0,0.75),
-      -0.05em -0.025em 0 rgba(0,255,0,0.75),
-      -0.025em 0.05em 0 rgba(0,0,255,0.75);
+      0.05em 0 0 rgba(218,119,86,0.75),
+      -0.05em -0.025em 0 rgba(255,160,100,0.5),
+      -0.025em 0.05em 0 rgba(180,80,50,0.5);
   }
   15% {
     text-shadow:
-      -0.05em -0.025em 0 rgba(255,0,0,0.75),
-      0.025em 0.025em 0 rgba(0,255,0,0.75),
-      -0.05em -0.05em 0 rgba(0,0,255,0.75);
+      -0.05em -0.025em 0 rgba(218,119,86,0.75),
+      0.025em 0.025em 0 rgba(255,160,100,0.5),
+      -0.05em -0.05em 0 rgba(180,80,50,0.5);
   }
   49% {
     text-shadow:
-      -0.05em -0.025em 0 rgba(255,0,0,0.75),
-      0.025em 0.025em 0 rgba(0,255,0,0.75),
-      -0.05em -0.05em 0 rgba(0,0,255,0.75);
+      -0.05em -0.025em 0 rgba(218,119,86,0.75),
+      0.025em 0.025em 0 rgba(255,160,100,0.5),
+      -0.05em -0.05em 0 rgba(180,80,50,0.5);
   }
   50% {
     text-shadow:
-      0.025em 0.05em 0 rgba(255,0,0,0.75),
-      0.05em 0 0 rgba(0,255,0,0.75),
-      0 -0.05em 0 rgba(0,0,255,0.75);
+      0.025em 0.05em 0 rgba(218,119,86,0.75),
+      0.05em 0 0 rgba(255,160,100,0.5),
+      0 -0.05em 0 rgba(180,80,50,0.5);
   }
   99% {
     text-shadow:
-      0.025em 0.05em 0 rgba(255,0,0,0.75),
-      0.05em 0 0 rgba(0,255,0,0.75),
-      0 -0.05em 0 rgba(0,0,255,0.75);
+      0.025em 0.05em 0 rgba(218,119,86,0.75),
+      0.05em 0 0 rgba(255,160,100,0.5),
+      0 -0.05em 0 rgba(180,80,50,0.5);
   }
   100% {
     text-shadow:
-      -0.025em 0 0 rgba(255,0,0,0.75),
-      -0.025em -0.025em 0 rgba(0,255,0,0.75),
-      -0.025em -0.05em 0 rgba(0,0,255,0.75);
+      -0.025em 0 0 rgba(218,119,86,0.75),
+      -0.025em -0.025em 0 rgba(255,160,100,0.5),
+      -0.025em -0.05em 0 rgba(180,80,50,0.5);
   }
 }
 
