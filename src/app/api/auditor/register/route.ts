@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerAuditor } from "@/lib/marketplace/auditor";
-import {
-  isValidSolanaAddress,
-  verifyWalletSignature,
-  getVigilTokenBalance,
-} from "@/lib/solana-verify";
-import { getOnChainStake, isStakingConfigured } from "@/lib/solana-programs";
+import { getChainAdapter, isValidChainId } from "@/lib/chain";
 
 const SIGNATURE_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -14,7 +9,7 @@ const SIGNATURE_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
  */
 export async function POST(request: NextRequest) {
   try {
-    const { walletAddress, signature, message, timestamp } =
+    const { walletAddress, signature, message, timestamp, chain: rawChain } =
       await request.json();
 
     if (!walletAddress || typeof walletAddress !== "string") {
@@ -24,9 +19,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!isValidSolanaAddress(walletAddress)) {
+    // Validate chain parameter (defaults to "solana")
+    const chain = rawChain || "solana";
+    if (!isValidChainId(chain)) {
       return NextResponse.json(
-        { error: "Invalid Solana wallet address" },
+        { error: `Unsupported chain: ${chain}` },
+        { status: 400 }
+      );
+    }
+
+    const adapter = getChainAdapter(chain);
+
+    if (!adapter.isValidAddress(walletAddress)) {
+      return NextResponse.json(
+        { error: "Invalid wallet address" },
         { status: 400 }
       );
     }
@@ -56,8 +62,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify Ed25519 signature
-    const valid = verifyWalletSignature(walletAddress, message, signature);
+    // Verify signature (async for Base/EIP-191, sync for Solana/Ed25519)
+    const valid = await adapter.verifySignature(walletAddress, message, signature);
     if (!valid) {
       return NextResponse.json(
         { error: "Invalid wallet signature" },
@@ -65,31 +71,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check on-chain stake first (Anchor program), fallback to token balance
+    // Check on-chain stake first, fallback to token balance
     let stakeAmount = 1000; // Default bronze minimum (demo mode)
 
-    if (isStakingConfigured()) {
-      const stakeData = await getOnChainStake(walletAddress);
+    if (adapter.isStakingConfigured()) {
+      const stakeData = await adapter.getStake(walletAddress);
       if (stakeData && stakeData.amount > 0) {
-        // Trust on-chain stake (amount is in 6-decimal base units, convert to whole tokens)
-        stakeAmount = stakeData.amount / 1e6;
+        stakeAmount = stakeData.amount;
       } else {
-        // No on-chain stake — fallback to token balance check
-        const balance = await getVigilTokenBalance(walletAddress);
+        const balance = await adapter.getTokenBalance(walletAddress);
         stakeAmount = balance ?? 1000;
       }
     } else {
-      // Staking program not deployed — use token balance (demo mode)
-      const balance = await getVigilTokenBalance(walletAddress);
+      const balance = await adapter.getTokenBalance(walletAddress);
       stakeAmount = balance ?? 1000;
     }
 
-    const auditor = await registerAuditor(walletAddress, stakeAmount);
+    const auditor = await registerAuditor(walletAddress, stakeAmount, chain);
 
     return NextResponse.json({
       message: "Auditor registered successfully",
       auditor,
-      demoMode: !isStakingConfigured(),
+      demoMode: !adapter.isStakingConfigured(),
     });
   } catch (error) {
     console.error("Auditor registration error:", error);

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { SolanaProvider } from "@/components/SolanaProvider";
+import { ChainProvider, BASE_ENABLED } from "@/lib/chain/context";
+import { ConditionalBaseProvider } from "@/components/ConditionalBaseProvider";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -43,7 +45,13 @@ export default function RootLayout({
         />
       </head>
       <body className={`${jetbrainsMono.variable} antialiased`}>
-        <SolanaProvider>{children}</SolanaProvider>
+        <ChainProvider>
+          <SolanaProvider>
+            <ConditionalBaseProvider baseEnabled={BASE_ENABLED}>
+              {children}
+            </ConditionalBaseProvider>
+          </SolanaProvider>
+        </ChainProvider>
       </body>
     </html>
   );

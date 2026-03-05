@@ -6,7 +6,7 @@ Decentralized AI skill verification network. Scans agent skills for vulnerabilit
 
 - **App**: Next.js 16 (App Router) + TypeScript + Tailwind CSS 4
 - **DB**: Supabase (Postgres + RLS)
-- **Payments**: SOL on Solana (wallet adapter + on-chain verification)
+- **Payments**: SOL on Solana + ETH on Base L2 (dual-chain, feature-flagged via `NEXT_PUBLIC_BASE_ENABLED`)
 - **Identity**: ERC-8004 agent registry on Solana via `8004-solana` SDK
 - **AI**: Groq (free tier, Llama 3.3 70B) + Anthropic (paid tier, Claude Sonnet)
 - **Programs**: Anchor (Rust) in `programs/` — VigilStaking, VigilChallenge, BountyVault
@@ -43,10 +43,16 @@ src/
     supabase.ts           # DB client (no generic types — use `any` casts)
     fetcher.ts            # Fetch + parse SKILL.md from GitHub URLs
     rate-limit.ts         # IP-based rate limiting via Supabase
+    chain/                # Chain abstraction layer (dual-chain support)
+      types.ts            # ChainAdapter interface, ChainId, PaymentInfo
+      index.ts            # Adapter registry + BASE_ENABLED flag
+      solana-adapter.ts   # Wraps existing Solana code
+      base-adapter.ts     # viem implementation for Base L2
+      context.tsx          # React chain selection context + useChain hook
     solana.ts             # Solana connection + config singleton
     solana-verify.ts      # On-chain verification (signatures, balances, payments)
     solana-programs.ts    # Anchor program client (staking, challenge, bounty reads)
-  components/             # React components (Header, Footer, ScanForm, ScoreBadge, FindingCard)
+  components/             # React components (Header, Footer, ScanForm, ScoreBadge, FindingCard, ChainSelector, BaseProvider)
   mcp/server.ts           # MCP server for Claude Code integration
 programs/
   programs/
@@ -82,6 +88,10 @@ contracts-archive/        # Archived Solidity contracts (Base deployment history
 - `VIGIL_TOKEN_MINT` not set = demo mode (token balance returns null, default bronze tier).
 - `VIGIL_STAKING_PROGRAM_ID` not set = staking not deployed (falls back to token balance for tier).
 - `8004-solana` uses base58 asset pubkeys for agent identity, not numeric IDs.
+- `NEXT_PUBLIC_BASE_ENABLED` not set = Base hidden. Set to `"true"` to activate dual-chain UI + API.
+- Paid scan API (`/api/v1/scan`) accepts optional `chain` param: `"solana"` (default) or `"base"`.
+- Auditor registration accepts optional `chain` param. Auditor uniqueness is per (wallet_address, chain).
+- MCP `vigil_scan` tool accepts optional `chain` param for Base payments.
 - `gray-matter` parses YAML frontmatter — import as default: `import matter from "gray-matter"`.
 - Anchor programs dir has its own `package.json` and `Cargo.toml`. Run anchor commands from `programs/`.
 - Anchor programs require Rust toolchain: `rustup`, `solana-cli`, `anchor-cli`.
