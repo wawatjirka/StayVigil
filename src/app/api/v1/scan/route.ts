@@ -12,7 +12,7 @@ import {
 
 /**
  * Paid scan endpoint — full report with all findings.
- * Accepts SOL or $VIGIL payment on Solana.
+ * Accepts SOL or SPL token payment on Solana.
  */
 export async function POST(request: NextRequest) {
   try {

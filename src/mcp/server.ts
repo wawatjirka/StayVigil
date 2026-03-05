@@ -57,9 +57,9 @@ const TOOLS = [
         },
         paymentType: {
           type: "string",
-          enum: ["sol", "vigil"],
+          enum: ["sol", "token"],
           description:
-            "Token used for payment: 'sol' or 'vigil'. Required when txSignature is provided.",
+            "Token used for payment: 'sol' or 'token'. Required when txSignature is provided.",
         },
       },
       required: ["skillUrl"],
@@ -114,11 +114,11 @@ async function handleScan(
       const lines = [
         `## Payment Required`,
         ``,
-        `A paid scan requires SOL or $VIGIL payment on Solana.`,
+        `A paid scan requires SOL or SPL token payment on Solana.`,
         ``,
         `**Treasury wallet:** ${p?.treasury ?? "not configured"}`,
         `**SOL price:** ${p?.priceSol ?? "N/A"} SOL`,
-        `**$VIGIL price:** ${p?.priceVigil ?? "N/A"} VIGIL`,
+        `**Token price:** ${p?.priceVigil ?? "N/A"} tokens`,
         `**Token mint:** ${p?.mint ?? "not configured"}`,
         `**Network:** ${p?.network ?? "solana"}`,
         ``,

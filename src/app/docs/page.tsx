@@ -66,7 +66,7 @@ export default function DocsPage() {
             <h2 className="text-xl font-bold">POST /API/V1/SCAN</h2>
           </div>
           <p className="text-muted-foreground font-mono mb-4 text-sm">
-            Deep scan with Claude Sonnet. Pay with SOL or $VIGIL on Solana.
+            Deep scan with Claude Sonnet. Pay with SOL on Solana.
             No API key needed — send a transaction and include the signature.
           </p>
           <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
@@ -76,7 +76,7 @@ curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
   -H "Content-Type: application/json" \\
   -d '{"skillUrl": "https://github.com/user/repo/blob/main/SKILL.md"}'
 
-# Step 2: Send SOL or $VIGIL to the treasury wallet, then retry with txSignature
+# Step 2: Send SOL to the treasury wallet, then retry with txSignature
 curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
   -H "Content-Type: application/json" \\
   -d '{"skillUrl": "...", "txSignature": "5K7x...", "paymentType": "sol"}'`}</code>

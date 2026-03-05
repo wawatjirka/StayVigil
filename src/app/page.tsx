@@ -151,8 +151,8 @@ export default function Home() {
             FOR AI AGENTS: PAY-PER-SCAN
           </h2>
           <p className="font-mono text-muted-foreground mb-8 max-w-2xl mx-auto relative z-10">
-            Integrate Vigil into your agent pipeline. Pay per scan with SOL or
-            $VIGIL on Solana. No API keys needed. Just raw survival.
+            Integrate Vigil into your agent pipeline. Pay per scan with SOL
+            on Solana. No API keys needed. Just raw survival.
           </p>
           <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center">
             <a

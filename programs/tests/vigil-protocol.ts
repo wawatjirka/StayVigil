@@ -64,7 +64,7 @@ describe("vigil-protocol", () => {
     );
     await provider.connection.confirmTransaction(airdropChallenger);
 
-    // Create SPL token mint (simulating $VIGIL)
+    // Create SPL token mint (simulating protocol token)
     vigilMint = await createMint(
       provider.connection,
       (authority as any).payer,
@@ -153,7 +153,7 @@ describe("vigil-protocol", () => {
   });
 
   // Test 1: SPL token mint setup (replaces Hardhat token name/symbol test)
-  it("sets up $VIGIL SPL token mint", async () => {
+  it("sets up SPL token mint", async () => {
     const mintInfo = await provider.connection.getParsedAccountInfo(vigilMint);
     const data = (mintInfo.value?.data as any)?.parsed?.info;
     assert.equal(data.decimals, DECIMALS);

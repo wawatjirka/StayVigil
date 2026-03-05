@@ -45,7 +45,7 @@ export function verifyWalletSignature(
 }
 
 /**
- * Get the $VIGIL SPL token balance for a wallet.
+ * Get the SPL token balance for a wallet.
  * Returns null if VIGIL_TOKEN_MINT is not set (demo/pre-launch mode).
  */
 export async function getVigilTokenBalance(
@@ -126,7 +126,7 @@ export async function verifySolPayment(
 }
 
 /**
- * Verify a $VIGIL SPL token transfer to the treasury wallet.
+ * Verify an SPL token transfer to the treasury wallet.
  */
 export async function verifyVigilPayment(
   txSignature: string
@@ -134,7 +134,7 @@ export async function verifyVigilPayment(
   const treasury = getTreasuryWallet();
   const mint = getTokenMint();
   if (!treasury) return { verified: false, error: "Treasury wallet not configured" };
-  if (!mint) return { verified: false, error: "VIGIL token mint not configured" };
+  if (!mint) return { verified: false, error: "Token mint not configured" };
 
   try {
     const connection = getSolanaConnection();
@@ -174,7 +174,7 @@ export async function verifyVigilPayment(
     if (received < required) {
       return {
         verified: false,
-        error: `Insufficient payment: received ${received} $VIGIL, required ${required} $VIGIL`,
+        error: `Insufficient payment: received ${received} tokens, required ${required} tokens`,
       };
     }
 

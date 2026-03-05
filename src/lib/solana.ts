@@ -16,7 +16,7 @@ export function getSolanaConnection(): Connection {
 }
 
 /**
- * Returns the $VIGIL token mint address, or null if not yet set (demo mode).
+ * Returns the SPL token mint address, or null if not yet set (demo mode).
  */
 export function getTokenMint(): PublicKey | null {
   const mint = process.env.VIGIL_TOKEN_MINT;
@@ -49,7 +49,7 @@ export function getScanPriceSol(): number {
 }
 
 /**
- * Price for a paid scan in $VIGIL tokens.
+ * Price for a paid scan in SPL tokens.
  */
 export function getScanPriceVigil(): number {
   return parseFloat(process.env.SCAN_PRICE_VIGIL || "100");

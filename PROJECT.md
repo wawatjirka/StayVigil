@@ -6,7 +6,7 @@ Decentralized AI skill verification network. Scans agent skills for vulnerabilit
 
 - **App**: Next.js 16 (App Router) + TypeScript + Tailwind CSS 4
 - **DB**: Supabase (Postgres + RLS)
-- **Payments**: SOL / $VIGIL on Solana (wallet adapter + on-chain verification)
+- **Payments**: SOL on Solana (wallet adapter + on-chain verification)
 - **Identity**: ERC-8004 agent registry on Solana via `8004-solana` SDK
 - **AI**: Groq (free tier, Llama 3.3 70B) + Anthropic (paid tier, Claude Sonnet)
 - **Programs**: Anchor (Rust) in `programs/` — VigilStaking, VigilChallenge, BountyVault
@@ -28,7 +28,7 @@ cd programs && anchor test    # Run program tests (6 tests)
 src/
   app/                    # Next.js App Router pages + API routes
     api/scan/             # Free scan endpoint (rate-limited, top 3 findings)
-    api/v1/scan/          # Paid scan endpoint (SOL/$VIGIL payment, full report)
+    api/v1/scan/          # Paid scan endpoint (SOL payment, full report)
     api/score/            # Cached score lookup
     api/badge/            # Trust badge for SkillsMP integration
     api/reputation/       # 8004-solana on-chain reputation
@@ -85,6 +85,6 @@ contracts-archive/        # Archived Solidity contracts (Base deployment history
 - `gray-matter` parses YAML frontmatter — import as default: `import matter from "gray-matter"`.
 - Anchor programs dir has its own `package.json` and `Cargo.toml`. Run anchor commands from `programs/`.
 - Anchor programs require Rust toolchain: `rustup`, `solana-cli`, `anchor-cli`.
-- SPL token decimals: $VIGIL uses 6 decimals (pump.fun standard). All on-chain thresholds use base units.
+- SPL token uses 6 decimals (pump.fun standard). All on-chain thresholds use base units.
 - Use `supabase-migration-full.sql` for fresh Supabase setup (combines all phases). Must be run manually in the Supabase SQL editor.
 - `programs/` and `contracts-archive/` are excluded from root tsconfig and eslint config.

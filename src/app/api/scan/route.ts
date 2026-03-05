@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
           scannedAt: cached.scanned_at,
           cached: true,
           tier: "free",
-          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL or $VIGIL payment for Sonnet deep review + full report.",
+          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL payment for Sonnet deep review + full report.",
         },
         {
           headers: {
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
           scannedAt: result.scannedAt,
           cached: false,
           tier: "free",
-          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL or $VIGIL payment for Sonnet deep review + full report.",
+          note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL payment for Sonnet deep review + full report.",
         },
         {
           headers: {
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
         scannedAt: result.scannedAt,
         cached: false,
         tier: "free",
-        note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL or $VIGIL payment for Sonnet deep review + full report.",
+        note: "Free tier: Haiku AI + top 3 findings. Use POST /api/v1/scan with SOL payment for Sonnet deep review + full report.",
       },
       {
         headers: {

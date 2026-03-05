@@ -150,7 +150,7 @@ export default function AuditorPage() {
       <main className="max-w-3xl mx-auto px-6 py-12 w-full">
         <h1 className="text-3xl font-bold mb-2">BECOME AN AUDITOR</h1>
         <p className="text-muted-foreground font-mono mb-8">
-          Hold $VIGIL tokens, verify AI skills, and earn fees for every scan.
+          Stake tokens, verify AI skills, and earn fees for every scan.
         </p>
 
         {/* Registration form */}
@@ -183,7 +183,7 @@ export default function AuditorPage() {
             </div>
             <div className="text-sm text-muted-foreground font-mono">
               <p className="mb-1">
-                Your tier is determined by your $VIGIL token balance:
+                Your tier is determined by your staked token balance:
               </p>
               <div className="flex gap-4">
                 <span className="text-amber-600">Bronze: 1,000</span>
