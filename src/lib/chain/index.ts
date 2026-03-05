@@ -3,9 +3,11 @@ import { SolanaAdapter } from "./solana-adapter";
 
 export type { ChainId, ChainAdapter, PaymentInfo, VerificationResult } from "./types";
 
-// Use a function so NEXT_PUBLIC_ var is read at runtime, not inlined at build time
+// Server-side runtime check — uses non-prefixed var to avoid Next.js build-time inlining
 export function isBaseEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_BASE_ENABLED === "true" || process.env.BASE_ENABLED === "true";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const env = process.env as any;
+  return env["BASE_ENABLED"] === "true" || env["NEXT_PUBLIC_BASE_ENABLED"] === "true";
 }
 
 // Keep const export for client-side context (inlined at build time is fine for UI)
