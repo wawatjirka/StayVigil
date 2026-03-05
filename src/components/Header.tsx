@@ -20,7 +20,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3">
           <Eye className="w-8 h-8 text-primary animate-pulse" />
           <span className="font-display font-bold text-xl tracking-widest text-primary glitch-text">
-            VIGIL
+            STAYVIGIL
           </span>
         </Link>
       </div>
