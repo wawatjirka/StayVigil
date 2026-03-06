@@ -66,9 +66,12 @@ export default function DocsPage() {
             <h2 className="text-xl font-bold">POST /API/V1/SCAN</h2>
           </div>
           <p className="text-muted-foreground font-mono mb-4 text-sm">
-            Deep scan with Claude Sonnet. Pay with SOL on Solana.
+            Deep scan with Claude Sonnet. Pay with SOL on Solana or ETH on Base.
             No API key needed — send a transaction and include the signature.
           </p>
+          <h3 className="text-sm font-bold text-primary/60 mb-2 font-display uppercase tracking-wider">
+            Solana (default)
+          </h3>
           <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
             <pre className="text-sm text-primary/80 font-mono">
               <code>{`# Step 1: Get payment details (returns 402 with treasury + prices)
@@ -82,9 +85,29 @@ curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
   -d '{"skillUrl": "...", "txSignature": "5K7x...", "paymentType": "sol"}'`}</code>
             </pre>
           </div>
+          <h3 className="text-sm font-bold text-primary/60 mb-2 font-display uppercase tracking-wider">
+            Base (Ethereum L2)
+          </h3>
+          <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
+            <pre className="text-sm text-primary/80 font-mono">
+              <code>{`# Step 1: Get payment details for Base (returns 402 with ETH treasury)
+curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
+  -H "Content-Type: application/json" \\
+  -d '{"skillUrl": "https://github.com/user/repo/blob/main/SKILL.md", "chain": "base"}'
+
+# Step 2: Send ETH to the treasury wallet, then retry with txSignature
+curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
+  -H "Content-Type: application/json" \\
+  -d '{"skillUrl": "...", "txSignature": "0xabc...", "paymentType": "sol", "chain": "base"}'`}</code>
+            </pre>
+          </div>
           <p className="text-sm text-muted-foreground font-mono">
             Returns full report with all findings, severity breakdown, and
-            recommendation. No rate limit. Accepts{" "}
+            recommendation. No rate limit. Pass{" "}
+            <code className="px-1.5 py-0.5 border border-primary/30 bg-black text-primary text-sm">
+              chain: &quot;solana&quot; | &quot;base&quot;
+            </code>{" "}
+            to select network. Accepts{" "}
             <code className="px-1.5 py-0.5 border border-primary/30 bg-black text-primary text-sm">
               paymentType: &quot;sol&quot; | &quot;vigil&quot;
             </code>
@@ -119,8 +142,8 @@ curl -X POST https://vigil-protocol.vercel.app/api/v1/scan \\
             <h2 className="text-xl font-bold">CLAUDE CODE INTEGRATION</h2>
           </div>
           <p className="text-muted-foreground font-mono mb-4 text-sm">
-            Use Vigil directly inside Claude Code via MCP. Add this to your MCP
-            config:
+            Use StayVigil directly inside Claude Code via MCP. Supports both
+            Solana and Base payments. Add this to your MCP config:
           </p>
           <div className="border border-primary/30 bg-black p-4 mb-4 overflow-x-auto">
             <pre className="text-sm text-primary/80 font-mono">

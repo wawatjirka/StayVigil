@@ -40,8 +40,8 @@ export default function Home() {
                 <span className="text-muted-foreground">LLM Audits</span>
               </div>
               <div className="flex flex-col border-l border-primary/20 pl-4">
-                <span className="text-3xl text-accent font-bold">0.0001</span>
-                <span className="text-muted-foreground">Per Scan (SOL)</span>
+                <span className="text-3xl text-accent font-bold">2</span>
+                <span className="text-muted-foreground">Chains (SOL + ETH)</span>
               </div>
             </div>
           </div>
