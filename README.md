@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StayVigil
 
-## Getting Started
+Trust, but verify. Scan AI agent skills for security vulnerabilities before installing them.
 
-First, run the development server:
+**https://vigil-protocol.vercel.app**
+
+## What it does
+
+StayVigil scans AI agent skills (SKILL.md files, MCP tools, etc.) for:
+
+- Prompt injection and hidden instructions
+- Data exfiltration patterns
+- Dangerous shell commands
+- Dependency risks
+- Obfuscated code
+- And more (12+ static checks + LLM deep review)
+
+Returns a trust score (0-100) and detailed findings.
+
+## API
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Free scan (rate limited, top 3 findings)
+curl -X POST https://vigil-protocol.vercel.app/api/scan \
+  -H "Content-Type: application/json" \
+  -d '{"skillUrl": "https://github.com/user/repo/blob/main/SKILL.md"}'
+
+# Score lookup (cached, instant)
+curl "https://vigil-protocol.vercel.app/api/score?url=https://github.com/user/repo/blob/main/SKILL.md"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## MCP Integration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Use StayVigil directly in Claude Code:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```json
+{
+  "mcpServers": {
+    "vigil": {
+      "command": "node",
+      "args": ["path/to/stayvigil/dist/mcp/server.js"]
+    }
+  }
+}
+```
 
-## Learn More
+## Stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js 16 + TypeScript + Tailwind CSS 4
+- Supabase (Postgres)
+- Solana + Base L2 (dual-chain payments)
+- Groq (free tier) + Anthropic (paid tier)
+- Anchor programs (staking, challenges, bounties)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
