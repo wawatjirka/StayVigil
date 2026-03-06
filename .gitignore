@@ -42,6 +42,9 @@ yarn-error.log*
 # archived contracts (Base/EVM)
 contracts-archive/
 
+# local reference files
+Vigil-Degenerate-1/
+
 
 # anchor
 programs/target/
